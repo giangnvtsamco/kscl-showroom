@@ -9,17 +9,19 @@
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <base target="_blank">
-<title>KSCL Showroom SAMCO</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<title>Kiểm soát chất lượng · SAMCO</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
-/* Bố cục: app một cột cho điện thoại. Thanh trên gọn (tên app + tài khoản), thanh tab cố định ở đáy màn hình (điện thoại), chuyển lên trên khi màn hình rộng.
-   Nền xám lạnh như sàn showroom, thẻ trắng, một màu nhấn xanh điện; trạng thái Đạt / Chưa đạt / Chờ dùng màu ngữ nghĩa riêng. */
+/* Quy chuẩn giao diện SAMCO: nền xám lạnh, thẻ trắng, màu nhấn xanh thép #1F4E8C, tiêu đề Anton in hoa, vạch chrome.
+   Một cột, mobile-first; thanh tab ở đáy trên điện thoại, dạng pill ở trên khi màn hình rộng. */
 :root{
-  --bg:#f2f4f7; --paper:#ffffff; --paper-2:#f7f8fa; --ink:#111827; --muted:#667085; --line:#e3e7ed;
-  --accent:#1554d1; --accent-ink:#ffffff; --accent-soft:#e9f0fd;
+  --bg:#f2f4f7; --paper:#ffffff; --paper-2:#f6f7f9; --ink:#111827; --muted:#667085; --line:#e3e7ed;
+  --accent:#1f4e8c; --accent-ink:#ffffff; --accent-soft:#e7eff9;
   --ok:#147a44; --ok-soft:#e6f5ec; --warn:#a85d00; --warn-soft:#fdf2df; --bad:#c3281f; --bad-soft:#fdeceb;
+  --chrome:linear-gradient(135deg,#f7f7f7 0%,#d4d7dc 45%,#fafafa 55%,#c9cdd3 100%);
   --shadow:0 1px 2px rgba(17,24,39,.05),0 4px 14px rgba(17,24,39,.05);
-  --display:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --scrim:rgba(17,24,39,.5); --scrim-2:rgba(8,10,14,.92); --on-scrim:#ffffff;
+  --display:Anton,"Be Vietnam Pro",system-ui,sans-serif;
   --body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
   --r:14px; --tabbar:64px;
@@ -27,14 +29,14 @@
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0c1016; --paper:#151b23; --paper-2:#1a212b; --ink:#e8edf3; --muted:#8d9aab; --line:#27313d;
-  --accent:#6ea6ff; --accent-ink:#0c1016; --accent-soft:#17263d;
+  --accent:#86b0ee; --accent-ink:#0c1016; --accent-soft:#162843;
   --ok:#4fd18b; --ok-soft:#12271b; --warn:#f3b04a; --warn-soft:#2d2210; --bad:#ff7d72; --bad-soft:#341818;
-  --shadow:none; color-scheme:dark}}
+  --chrome:linear-gradient(135deg,#3a414b 0%,#8a929e 45%,#4a525d 55%,#7c8490 100%); --shadow:none; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0c1016; --paper:#151b23; --paper-2:#1a212b; --ink:#e8edf3; --muted:#8d9aab; --line:#27313d;
-  --accent:#6ea6ff; --accent-ink:#0c1016; --accent-soft:#17263d;
+  --accent:#86b0ee; --accent-ink:#0c1016; --accent-soft:#162843;
   --ok:#4fd18b; --ok-soft:#12271b; --warn:#f3b04a; --warn-soft:#2d2210; --bad:#ff7d72; --bad-soft:#341818;
-  --shadow:none; color-scheme:dark}
+  --chrome:linear-gradient(135deg,#3a414b 0%,#8a929e 45%,#4a525d 55%,#7c8490 100%); --shadow:none; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
@@ -44,40 +46,42 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15p
 img{max-width:100%}
 .wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 main{display:flex;flex-direction:column;gap:16px}
-h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
-h1{font-size:1.6rem;line-height:1.15;font-weight:700}
-h2{font-size:1.08rem;font-weight:700}
-h3{font-size:1rem;font-weight:600;line-height:1.3}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--display);font-weight:400;font-size:1.9rem;line-height:1.1;text-transform:uppercase;letter-spacing:.01em}
+h2{font-family:var(--display);font-weight:400;font-size:1.15rem;line-height:1.2;text-transform:uppercase;letter-spacing:.02em}
+h3{font-size:1rem;font-weight:700;line-height:1.3}
 p{margin:0}
 a{color:var(--accent)}
-.eyebrow{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.eyebrow{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .muted{color:var(--muted)} .small{font-size:.84rem}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.chrome-bar{display:block;width:44px;height:3px;border-radius:2px;background:var(--chrome)}
+.req{color:var(--bad)}
 
-/* ---------- thanh trên ---------- */
-.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--bg);display:flex;align-items:center;gap:10px;padding-block:12px 10px;margin:0 auto;max-width:820px;width:100%}
+/* ---------- thanh trên: dòng thương hiệu → tên app Anton → vạch chrome ---------- */
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--bg);display:flex;align-items:center;gap:12px;padding-block:12px 10px;margin:0 auto;max-width:820px;width:100%}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:16}
-.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
-.mark{min-width:40px;height:34px;padding:0 7px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800;font-size:.66rem;letter-spacing:.04em;flex:none}
-.mark-img{width:40px;height:40px;border-radius:12px;display:block;flex:none;object-fit:cover}
-.brand b{display:block;font-size:.95rem;line-height:1.15}
-.brand span{display:block;font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.who{font-size:.78rem;color:var(--muted);white-space:nowrap;max-width:38vw;overflow:hidden;text-overflow:ellipsis}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+.mark-img{width:42px;height:42px;border-radius:12px;display:block;flex:none;object-fit:cover}
+.brand .bl{display:flex;flex-direction:column;gap:3px;min-width:0}
+.brand .line{font-size:.56rem;font-weight:700;letter-spacing:.55em;text-transform:uppercase;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand .app{font-family:var(--display);font-size:clamp(1rem,4.8vw,1.22rem);overflow:hidden;text-overflow:ellipsis;line-height:1;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+.who{font-size:.74rem;color:var(--muted);white-space:nowrap;max-width:34vw;overflow:hidden;text-overflow:ellipsis;text-align:right}
 @media (max-width:560px){.who{display:none}}
-button.out{font:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+button.out{font:inherit;font-size:.8rem;font-weight:700;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:0 16px;min-height:38px;cursor:pointer;white-space:nowrap}
 
-/* ---------- thanh tab: đáy màn hình trên điện thoại ---------- */
+/* ---------- thanh tab ---------- */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-around;background:var(--paper);border-top:1px solid var(--line);
   padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
-.nav button{position:relative;flex:1;max-width:160px;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;font-size:.72rem;font-weight:600;color:var(--muted);background:none;border:none;padding:6px 4px;border-radius:12px;cursor:pointer}
+.nav button{position:relative;flex:1;max-width:160px;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;font-size:.7rem;font-weight:700;color:var(--muted);background:none;border:none;padding:6px 4px;border-radius:12px;cursor:pointer}
 .nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav button[aria-current="page"]{color:var(--accent)}
 .nav button[aria-current="page"] svg{fill:var(--accent-soft)}
 .nav .count{position:absolute;top:2px;left:calc(50% + 6px);font-family:var(--mono);font-size:.64rem;line-height:1;background:var(--bad);color:var(--paper);border-radius:999px;padding:3px 6px}
 @media (min-width:760px){
   body{padding-bottom:40px}
-  .nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px);bottom:auto;max-width:820px;margin:0 auto 4px;width:100%;justify-content:flex-start;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px}
-  .nav button{flex:none;max-width:none;flex-direction:row;gap:8px;font-size:.88rem;padding:8px 16px;border-radius:999px}
+  .nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px);bottom:auto;max-width:820px;margin:0 auto 4px;width:100%;justify-content:flex-start;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px}
+  .nav button{flex:none;max-width:none;flex-direction:row;gap:8px;font-size:.86rem;padding:8px 18px;border-radius:999px}
   .nav button svg{width:18px;height:18px}
   .nav button[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
   .nav button[aria-current="page"] svg{fill:none}
@@ -85,55 +89,57 @@ button.out{font:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--
 }
 
 /* ---------- thành phần chung ---------- */
-.head{display:flex;flex-direction:column;gap:12px;padding-top:4px}
+.head{display:flex;flex-direction:column;gap:12px;padding-top:6px}
+.head .ttl{display:flex;flex-direction:column;gap:6px}
 .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-label.f{display:flex;flex-direction:column;gap:5px;font-size:.78rem;color:var(--muted);font-weight:500;min-width:0}
-input[type=text],input[type=date],textarea,select{font:inherit;font-size:.95rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;min-width:0}
+input[type=text],input[type=date],input[type=password],textarea,select{font:inherit;font-size:.95rem;letter-spacing:normal;text-transform:none;font-weight:400;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;min-width:0;min-height:44px}
 textarea{resize:vertical}
 input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,.pick:focus-within{outline:2px solid var(--accent);outline-offset:2px}
-.banner{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:.88rem}
+.banner{background:var(--warn-soft);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:.88rem}
 .banner.info{background:var(--accent-soft)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button.btn{font:inherit;font-weight:600;font-size:.92rem;border-radius:10px;padding:11px 16px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);min-height:44px}
+button.btn{font:inherit;font-weight:700;font-size:.9rem;border-radius:999px;padding:0 20px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);min-height:44px}
 button.btn.ghost{background:var(--paper);color:var(--accent);border-color:var(--line)}
 button.btn.quiet{background:transparent;border-color:var(--line);color:var(--ink)}
-button.btn.sm{padding:6px 12px;font-size:.82rem;min-height:34px;border-radius:8px}
+button.btn.sm{padding:0 14px;font-size:.8rem;min-height:36px}
+button.btn.block{width:100%;text-transform:uppercase;letter-spacing:.14em;font-size:.82rem;min-height:48px}
 button.btn:disabled{opacity:.45;cursor:not-allowed}
 .empty{padding:22px 16px;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:.9rem;text-align:center;background:var(--paper)}
-.chip{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .chip.dat{background:var(--ok-soft);color:var(--ok)} .chip.can{background:var(--warn-soft);color:var(--warn)} .chip.khong{background:var(--bad-soft);color:var(--bad)} .chip.na{background:var(--paper-2);color:var(--muted)}
-.tag{font-size:.68rem;padding:2px 7px;border-radius:6px;background:var(--paper-2);color:var(--muted);font-weight:500;white-space:nowrap}
-.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tag{font-size:.68rem;padding:2px 8px;border-radius:999px;background:var(--paper-2);color:var(--muted);font-weight:600;white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .due{font-family:var(--mono);font-size:.74rem;color:var(--muted);white-space:nowrap}
 .due.late{color:var(--bad);font-weight:600}
-.status{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.status{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
 .status.open{background:var(--bad-soft);color:var(--bad)} .status.wait{background:var(--warn-soft);color:var(--warn)}
 
 /* ---------- đăng nhập ---------- */
-#v-login{align-items:center;padding-top:8vh}
-.login{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:22px 20px;display:flex;flex-direction:column;gap:14px;width:100%;max-width:420px}
-.login h2{font-size:1.35rem}
-#login-code{font-family:var(--mono);font-size:1.6rem;letter-spacing:.35em;text-align:center;padding:14px;border-radius:12px}
+#v-login{align-items:center;padding-top:6vh}
+.login{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:24px 20px;display:flex;flex-direction:column;gap:16px;width:100%;max-width:420px}
+.login .ttl{display:flex;flex-direction:column;gap:6px}
+#login-code{font-family:var(--mono);font-size:1.6rem;letter-spacing:.35em;text-align:center;padding:14px;border-radius:14px}
 .login .actions{flex-direction:column;align-items:stretch}
 
 /* ---------- kiểm tra ---------- */
-.period{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px;width:100%;max-width:360px}
-.period button{flex:1;font:inherit;font-weight:600;font-size:.9rem;padding:9px 10px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:9px}
+.period{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px;width:100%;max-width:360px}
+.period button{flex:1;font:inherit;font-weight:700;font-size:.88rem;min-height:38px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:999px}
 .period button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.sticky{position:sticky;top:calc(env(safe-area-inset-top,0px) + 56px);z-index:10;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-@media (min-width:760px){.sticky{top:calc(env(safe-area-inset-top,0px) + 110px)}}
+.sticky{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:10;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+@media (min-width:760px){.sticky{top:calc(env(safe-area-inset-top,0px) + 118px)}}
 .sticky .row1{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .bar{height:6px;border-radius:99px;background:var(--paper-2);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .3s}
 .grp{display:flex;flex-direction:column;gap:10px}
 .grp-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px 0}
-.grp-h h2{display:flex;align-items:center;gap:8px}
-.grp-h .code{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:.82rem;font-weight:800}
+.grp-h h2{display:flex;align-items:center;gap:10px}
+.grp-h .code{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-size:.95rem}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0;box-shadow:var(--shadow)}
 .card[data-st="dat"]{box-shadow:inset 3px 0 0 var(--ok),var(--shadow)} .card[data-st="can"]{box-shadow:inset 3px 0 0 var(--warn),var(--shadow)} .card[data-st="khong"]{box-shadow:inset 3px 0 0 var(--bad),var(--shadow)}
 .card-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 .card-top .sub{font-size:.76rem;color:var(--muted)}
-.allok{font:inherit;font-size:.76rem;font-weight:600;color:var(--ok);background:var(--ok-soft);border:none;border-radius:999px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.allok{font:inherit;font-size:.74rem;font-weight:700;color:var(--ok);background:var(--ok-soft);border:none;border-radius:999px;padding:0 12px;min-height:30px;cursor:pointer;white-space:nowrap}
 .crit{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .cr{display:grid;grid-template-columns:1fr auto;gap:8px 12px;padding:11px 0;border-top:1px solid var(--line);align-items:start}
 .cr:first-child{border-top:none;padding-top:2px}
@@ -141,12 +147,12 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .cr .t{font-size:.92rem;min-width:0}
 .cr input.note{margin-top:8px;font-size:.88rem;border-color:var(--bad);background:var(--bad-soft)}
 .seg{display:grid;grid-template-columns:repeat(3,minmax(64px,1fr));gap:6px;height:max-content}
-.seg button{font:inherit;font-size:.82rem;font-weight:600;padding:9px 8px;min-height:42px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;border-radius:10px}
+.seg button{font:inherit;font-size:.8rem;font-weight:700;padding:0 8px;min-height:42px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;border-radius:999px}
 .seg button[data-v="y"]::before{content:"✓ "} .seg button[data-v="n"]::before{content:"✕ "}
 .seg button[data-v="y"][aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--paper)}
 .seg button[data-v="n"][aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--paper)}
 .seg button[data-v="x"][aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.guide{font-size:.8rem;color:var(--muted);background:var(--paper-2);border-radius:10px;padding:8px 10px}
+.guide{font-size:.8rem;color:var(--muted);background:var(--paper-2);border-radius:12px;padding:8px 10px}
 .samples{display:flex;flex-direction:column;gap:6px}
 .samples .row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
 .samples button{flex:0 0 auto;width:132px;border:none;background:none;padding:0;cursor:pointer;text-align:left;color:var(--ink);scroll-snap-align:start}
@@ -155,78 +161,82 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .photos{display:flex;flex-wrap:wrap;gap:8px}
 .ph{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;background:var(--paper-2);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);text-align:center}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
-.ph .st{position:absolute;left:0;right:0;bottom:0;font-size:.6rem;background:rgba(0,0,0,.6);color:#fff;padding:2px 3px;text-align:center}
-.ph button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:14px;line-height:1;cursor:pointer}
-.pick{position:relative;width:76px;height:76px;border:1.5px dashed var(--accent);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--accent);font-size:.72rem;font-weight:600;cursor:pointer;text-align:center;background:var(--accent-soft)}
+.ph .st{position:absolute;left:0;right:0;bottom:0;font-size:.6rem;background:var(--scrim);color:var(--on-scrim);padding:2px 3px;text-align:center}
+.ph button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:none;background:var(--scrim);color:var(--on-scrim);font-size:14px;line-height:1;cursor:pointer}
+.pick{position:relative;width:76px;height:76px;border:1.5px dashed var(--accent);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--accent);font-size:.7rem;font-weight:700;cursor:pointer;text-align:center;background:var(--accent-soft)}
 .pick span.plus{font-size:1.5rem;line-height:1;font-weight:400}
 .pick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .report{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:14px}
-.tally{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
-@media (max-width:620px){.tally{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.tally>div{background:var(--paper-2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.tally b{font-family:var(--mono);font-size:1.35rem;line-height:1.1;font-variant-numeric:tabular-nums}
-.tally .first{background:var(--accent-soft)}
 .owner{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--paper)}
 .owner-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .owner ol{margin:0;padding-left:20px;font-size:.88rem}
 .owner li{margin:4px 0}
 textarea#sum{min-height:80px}
 
+/* ---------- dải KPI: ô chia vạch dọc, nhãn in hoa nhỏ, số Anton ---------- */
+.kpis{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.kpis>div{padding:12px 12px 11px;display:flex;flex-direction:column;gap:4px;min-width:0;border-left:1px solid var(--line)}
+.kpis>div:first-child{border-left:none}
+.kpis .lb2{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpis b{font-family:var(--display);font-weight:400;font-size:1.8rem;line-height:1;font-variant-numeric:tabular-nums}
+.kpis .bad b{color:var(--bad)} .kpis .warn b{color:var(--warn)} .kpis .ok b{color:var(--ok)} .kpis .acc b{color:var(--accent)}
+.kpis .sm2{font-size:.7rem;color:var(--muted)}
+@media (max-width:620px){.kpis.wrap2{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis.wrap2>div:nth-child(odd){border-left:none}.kpis.wrap2>div:nth-child(n+3){border-top:1px solid var(--line)}
+  .kpis.wrap3{grid-template-columns:repeat(3,minmax(0,1fr))}.kpis.wrap3>div:nth-child(3n+1){border-left:none}.kpis.wrap3>div:nth-child(n+4){border-top:1px solid var(--line)}}
+
 /* ---------- báo cáo ---------- */
-.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-@media (max-width:620px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.kpi>div{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
-.kpi b{font-family:var(--mono);font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums;font-weight:600}
-.kpi .bad b{color:var(--bad)} .kpi .warn b{color:var(--warn)}
 .filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 @media (max-width:620px){.filters{grid-template-columns:1fr 1fr}}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips button{font:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 13px;cursor:pointer}
-.chips button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chips button{font:inherit;font-size:.8rem;font-weight:700;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:0 14px;min-height:36px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .iss{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:inset 3px 0 0 var(--bad),var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .iss.wait{box-shadow:inset 3px 0 0 var(--warn),var(--shadow)}
 .iss .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .iss .meta2{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
-.iss .fix{font-size:.86rem;background:var(--ok-soft);border-radius:10px;padding:8px 10px}
-.iss .rev{font-size:.84rem;color:var(--bad);background:var(--bad-soft);border-radius:10px;padding:8px 10px}
+.iss .fix{font-size:.86rem;background:var(--ok-soft);border-radius:12px;padding:8px 10px}
+.iss .rev{font-size:.84rem;color:var(--bad);background:var(--bad-soft);border-radius:12px;padding:8px 10px}
 .iss .rv{flex:1;min-width:160px}
 .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .trio button{border:none;background:none;padding:0;cursor:pointer;text-align:left;color:var(--ink);min-width:0}
 .trio img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:var(--paper-2)}
 .trio .none{width:100%;aspect-ratio:4/3;border-radius:10px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);text-align:center;padding:4px}
-.trio .lbl2{font-size:.64rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.trio .lbl2{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .tbl{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--r)}
 table.h{border-collapse:collapse;width:100%;font-size:.86rem;min-width:420px}
 table.h th,table.h td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
 table.h tr:last-child td{border-bottom:none}
-table.h th{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.h th{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+table.h .r{text-align:right}
+.lock{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:36px 20px;background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.lock svg{width:34px;height:34px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---------- lớp phủ ---------- */
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabbar) + 18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:.9rem;z-index:50;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabbar) + 18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-size:.88rem;z-index:50;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 @media (min-width:760px){.toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))}}
-.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:40;padding:16px}
+.sheet{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;z-index:40;padding:16px}
 .sheet .box{background:var(--paper);border-radius:18px;padding:16px;width:100%;max-width:600px;display:flex;flex-direction:column;gap:10px;max-height:85vh}
 .sheet textarea{min-height:220px;font-size:.85rem;flex:1}
-.lb{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
-.lb img{max-width:100%;max-height:76vh;border-radius:10px;background:#fff}
-.lb p{color:#fff;font-size:.9rem;text-align:center;max-width:600px}
+.lb{position:fixed;inset:0;background:var(--scrim-2);z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.lb img{max-width:100%;max-height:76vh;border-radius:10px;background:var(--paper)}
+.lb p{color:var(--on-scrim);font-size:.9rem;text-align:center;max-width:600px}
 .lb .nav2{display:flex;gap:8px}
-.lb button{font:inherit;font-weight:600;border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;border-radius:999px;padding:8px 16px;cursor:pointer}
+.lb button{font:inherit;font-weight:700;border:1px solid var(--on-scrim);background:transparent;color:var(--on-scrim);border-radius:999px;padding:0 18px;min-height:40px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <script>
 window.__KSCL_ERR=[];
-function showFatal(m){var b=document.getElementById("fatal");if(!b){b=document.createElement("div");b.id="fatal";b.className="banner";b.style.margin="12px auto";b.style.maxWidth="860px";document.body.insertBefore(b,document.body.firstChild)}b.textContent="Trang gặp lỗi: "+m+". Hãy chụp màn hình này gửi người phụ trách.";}
+function showFatal(m){var b=document.getElementById("fatal");if(!b){b=document.createElement("div");b.id="fatal";b.className="banner";b.style.margin="12px auto";b.style.maxWidth="860px";document.body.insertBefore(b,document.body.firstChild)}b.textContent="Trang gặp lỗi: "+m+". Vui lòng chụp màn hình gửi Tổ kiểm tra.";}
 window.addEventListener("error",function(e){showFatal((e.message||"lỗi không rõ")+(e.lineno?" (dòng "+e.lineno+")":""))});
 </script>
 <header class="appbar">
-  <div class="brand"><img class="mark-img" src="logo.png" alt="VinFast SAMCO Bình Tân" width="40" height="40"><div style="min-width:0"><b>Khảo sát chất lượng</b><span>Showroom VinFast SAMCO Bình Tân</span></div></div>
+  <div class="brand"><img class="mark-img" src="logo.png" alt="VinFast SAMCO Bình Tân" width="42" height="42"><div class="bl"><span class="line">SAMCO Bình Tân</span><span class="app">Kiểm soát chất lượng</span><span class="chrome-bar"></span></div></div>
   <span class="who" id="who"></span><button class="out" id="logout" hidden>Đăng nhập</button>
 </header>
 <div class="wrap">
-  <p id="boot-msg" class="small muted" style="text-align:center;padding:24px 0">Đang tải trang… Nếu dòng này đứng yên quá 10 giây, bấm Ctrl + F5. Vẫn vậy thì chụp màn hình gửi người phụ trách.</p>
+  <p id="boot-msg" class="small muted" style="text-align:center;padding:24px 0">Đang tải… Nếu chờ quá 10 giây, vui lòng tải lại trang.</p>
   <nav class="nav" aria-label="Trang">
     <button data-view="kiem-tra"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 3.5h6v3H9z"/><path d="m8.5 13 2.2 2.2 4.8-4.8"/></svg><span>Kiểm tra</span></button>
     <button data-view="bao-cao"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg><span>Báo cáo</span><span class="count" id="nav-count" hidden></span></button>
@@ -237,12 +247,12 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
   <!-- ===================== ĐĂNG NHẬP ===================== -->
   <main id="v-login" hidden>
     <div class="login">
-      <h2 id="login-title">Đăng nhập</h2>
-      <p class="small muted">Trang Báo cáo xem được không cần mã. Nhập mã để vào Kiểm tra (Tổ kiểm tra) hoặc Khắc phục (các bộ phận). Máy sẽ nhớ cho lần sau.</p>
+      <div class="ttl"><span class="eyebrow" id="login-eyebrow">Nội bộ</span><h1 id="login-title">Đăng nhập</h1><span class="chrome-bar"></span></div>
+      <p class="small muted" id="login-note">Vui lòng nhập mã được cấp.</p>
       <div class="banner info" id="login-current" hidden></div>
-      <label class="f">Mã truy cập<input type="text" inputmode="numeric" id="login-code" autocomplete="off" placeholder="••••••"></label>
-      <label class="f">Họ và tên (không bắt buộc, ghi vào báo cáo)<input type="text" id="login-name" autocomplete="name" placeholder="VD: Nguyễn Văn A"></label>
-      <div class="actions"><button class="btn" id="login-go">Đăng nhập</button><button class="btn quiet" data-goto="bao-cao">Xem Báo cáo</button></div>
+      <label class="f"><span>Mã truy cập <span class="req">*</span></span><input type="password" inputmode="numeric" id="login-code" autocomplete="off" placeholder="••••••"></label>
+      <label class="f">Họ và tên<input type="text" id="login-name" autocomplete="name" placeholder="Nguyễn Văn A"></label>
+      <div class="actions"><button class="btn block" id="login-go">Đăng nhập</button><button class="btn quiet" data-goto="tieu-chuan">Xem tiêu chuẩn</button></div>
     </div>
   </main>
 
@@ -250,12 +260,9 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
   <main id="v-kiem-tra" hidden>
     <div id="kt-body" hidden style="display:flex;flex-direction:column;gap:20px">
       <header class="head">
-        <div>
-          <div class="eyebrow" id="hd-eyebrow">KSCL Showroom · VinFast SAMCO Bình Tân · 3S</div>
-          <h1>Phiếu kiểm tra showroom</h1>
-        </div>
+        <div class="ttl"><span class="eyebrow" id="hd-eyebrow">Showroom · 3S</span><h1>Phiếu kiểm tra</h1><span class="chrome-bar"></span></div>
         <div class="meta">
-          <label class="f">Người kiểm tra<input type="text" id="m-inspector" placeholder="Họ và tên"></label>
+          <label class="f"><span>Người kiểm tra <span class="req">*</span></span><input type="text" id="m-inspector" placeholder="Họ và tên"></label>
           <label class="f">Ngày kiểm tra<input type="date" id="m-date"></label>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
@@ -267,74 +274,74 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
         </div>
         <div class="banner" id="warn" hidden></div>
       </header>
-      <div class="sticky"><div class="row1"><span class="small" id="progress">Đang tải bộ tiêu chí…</span><button class="btn sm" id="jump-report">Xem kết quả</button></div><div class="bar"><i id="progress-bar"></i></div></div>
-      <div id="groups" style="display:flex;flex-direction:column;gap:26px"><div class="empty">Đang tải bộ tiêu chí từ Google Sheet…</div></div>
+      <div class="sticky"><div class="row1"><span class="small" id="progress">Đang tải tiêu chí…</span><button class="btn sm" id="jump-report">Xem kết quả</button></div><div class="bar"><i id="progress-bar"></i></div></div>
+      <div id="groups" style="display:flex;flex-direction:column;gap:26px"><div class="empty">Đang tải tiêu chí…</div></div>
 
       <section class="report" id="report">
-        <div><div class="eyebrow">Kết quả lần kiểm này</div><h2>Tổng hợp</h2></div>
-        <div class="tally" id="tally"></div>
+        <div class="ttl" style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">Lần kiểm này</span><h2>Kết quả</h2></div>
+        <div class="kpis wrap3" id="tally" style="--n:6"></div>
         <p class="small" id="unresolved"></p>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div class="eyebrow">Hạng mục chưa đạt theo bộ phận</div>
+          <div class="eyebrow">Chưa đạt theo bộ phận</div>
           <div id="issues" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
-        <label class="f">Nhận xét (không bắt buộc, hiện trên báo cáo PDF)<textarea id="sum" placeholder="VD: Showroom nhìn chung sạch; cần xử lý gấp đèn khu trưng bày và POSM chương trình tháng 11."></textarea></label>
-        <div class="actions">
-          <button class="btn" id="save-rep">Lưu kết quả kiểm tra</button>
-          <button class="btn ghost" data-goto="bao-cao">Mở trang Báo cáo</button>
-        </div>
-        <p class="muted" style="font-size:.8rem" id="scale-note"></p>
+        <label class="f">Nhận xét<textarea id="sum" placeholder="Hiện trên báo cáo PDF"></textarea></label>
+        <button class="btn block" id="save-rep">Lưu kết quả</button>
+        <p class="muted" style="font-size:.78rem" id="scale-note"></p>
       </section>
     </div>
   </main>
 
-  <!-- ===================== BÁO CÁO ===================== -->
+  <!-- ===================== BÁO CÁO (cần mã có quyền xem) ===================== -->
   <main id="v-bao-cao" hidden>
     <header class="head">
-      <div><div class="eyebrow" id="bc-eyebrow">Báo cáo tình trạng · cập nhật liên tục</div><h1>Hạng mục chưa đạt</h1></div>
+      <div class="ttl"><span class="eyebrow" id="bc-eyebrow">Hạng mục chưa đạt</span><h1>Báo cáo</h1><span class="chrome-bar"></span></div>
       <div class="actions"><span class="small muted" id="bc-time">Đang tải…</span><button class="btn quiet sm" id="bc-reload">Tải lại</button></div>
     </header>
-    <div class="kpi" id="bc-kpi"></div>
-    <div class="tally" id="bc-groups"></div>
+    <div class="kpis wrap2" id="bc-kpi" style="--n:4"></div>
+    <div class="kpis wrap3" id="bc-groups" style="--n:6"></div>
     <div class="filters">
-      <label class="f">Phần<select id="f-group"><option value="">Tất cả phần</option></select></label>
-      <label class="f">Bộ phận<select id="f-owner"><option value="">Tất cả bộ phận</option></select></label>
+      <label class="f">Phần<select id="f-group"><option value="">Tất cả</option></select></label>
+      <label class="f">Bộ phận<select id="f-owner"><option value="">Tất cả</option></select></label>
       <label class="f">Trạng thái<select id="f-status"><option value="">Tất cả</option><option>Chưa xử lý</option><option>Chờ xác nhận</option></select></label>
     </div>
     <div class="actions"><button class="btn" id="bc-pdf">Xuất PDF báo cáo</button><span class="small" id="bc-pdf-st"></span></div>
     <div id="bc-list" style="display:flex;flex-direction:column;gap:22px"><div class="empty">Đang tải…</div></div>
     <section class="grp">
       <div class="grp-h"><h2>Các lần kiểm gần đây</h2></div>
-      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Người kiểm</th><th>Tỷ lệ đạt</th><th>Đạt / Không</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
+      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Người kiểm</th><th class="r">Tỷ lệ đạt</th><th class="r">Đạt / Không</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
     </section>
   </main>
 
-  <!-- ===================== TIÊU CHUẨN (ai cũng xem được) ===================== -->
+  <!-- ===================== TIÊU CHUẨN (công khai) ===================== -->
   <main id="v-tieu-chuan" hidden>
     <header class="head">
-      <div><div class="eyebrow" id="tc-eyebrow">Bộ tiêu chuẩn KSCL · VinFast SAMCO Bình Tân</div><h1>Tiêu chuẩn showroom</h1></div>
-      <p class="small muted" id="tc-note">Xem từng tiêu chí, ảnh mẫu chuẩn VinFast, tần suất kiểm và bộ phận phụ trách. Không cần mã.</p>
+      <div class="ttl"><span class="eyebrow" id="tc-eyebrow">Bộ tiêu chuẩn KSCL</span><h1>Tiêu chuẩn showroom</h1><span class="chrome-bar"></span></div>
+      <p class="small muted" id="tc-note">Tiêu chí, ảnh mẫu VinFast, tần suất và bộ phận phụ trách.</p>
     </header>
-    <label class="f">Tìm tiêu chí<input type="text" id="tc-q" placeholder="VD: pin, đèn, thảm, WC, POSM…" autocomplete="off"></label>
+    <label class="f">Tìm tiêu chí<input type="text" id="tc-q" placeholder="pin, đèn, thảm, WC, POSM…" autocomplete="off"></label>
     <div class="chips" id="tc-groups"></div>
     <div class="filters">
-      <label class="f">Tần suất<select id="tc-freq"><option value="">Mọi tần suất</option><option value="day">Ngày</option><option value="week">Tuần</option><option value="month">Tháng</option><option value="quarter">Quý</option></select></label>
-      <label class="f">Bộ phận<select id="tc-owner"><option value="">Mọi bộ phận</option></select></label>
+      <label class="f">Tần suất<select id="tc-freq"><option value="">Tất cả</option><option value="day">Ngày</option><option value="week">Tuần</option><option value="month">Tháng</option><option value="quarter">Quý</option></select></label>
+      <label class="f">Bộ phận<select id="tc-owner"><option value="">Tất cả</option></select></label>
     </div>
     <p class="small muted" id="tc-count"></p>
-    <div id="tc-list" style="display:flex;flex-direction:column;gap:22px"><div class="empty">Đang tải bộ tiêu chuẩn…</div></div>
+    <div id="tc-list" style="display:flex;flex-direction:column;gap:22px"><div class="empty">Đang tải…</div></div>
   </main>
 
   <!-- ===================== KHẮC PHỤC ===================== -->
   <main id="v-khac-phuc" hidden>
     <div id="kp-body" hidden style="display:flex;flex-direction:column;gap:18px">
       <header class="head">
-        <div><div class="eyebrow">Khắc phục</div><h1 id="kp-title">Bộ phận</h1></div>
+        <div class="ttl"><span class="eyebrow">Khắc phục</span><h1 id="kp-title">Bộ phận</h1><span class="chrome-bar"></span></div>
         <div class="actions"><span class="small muted" id="kp-count"></span><button class="btn quiet sm" id="kp-reload">Tải lại</button></div>
       </header>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div class="eyebrow">Lọc theo phần</div><div class="chips" id="kp-groups"></div>
-        <label class="f" style="max-width:420px">Vị trí / khu vực<select id="kp-area"><option value="">Tất cả vị trí</option></select></label>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="chips" id="kp-groups"></div>
+        <div class="filters" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+          <label class="f" id="kp-owner-wrap" hidden>Bộ phận<select id="kp-owner"><option value="">Tất cả</option></select></label>
+          <label class="f">Vị trí<select id="kp-area"><option value="">Tất cả</option></select></label>
+        </div>
       </div>
       <div id="kp-list" style="display:flex;flex-direction:column;gap:12px"></div>
     </div>
@@ -344,14 +351,14 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
 <div class="lb" id="lb" hidden role="dialog" aria-label="Xem ảnh">
   <img id="lb-img" alt="">
   <p id="lb-cap"></p>
-  <div class="nav2"><button id="lb-prev">‹ Trước</button><button id="lb-close">Đóng</button><button id="lb-next">Sau ›</button></div>
+  <div class="nav2"><button id="lb-prev" aria-label="Ảnh trước">‹</button><button id="lb-close">Đóng</button><button id="lb-next" aria-label="Ảnh sau">›</button></div>
 </div>
 <div class="sheet" id="copy-sheet" hidden>
   <div class="box">
-    <b id="copy-title">Sao chép nội dung</b>
+    <b id="copy-title">Sao chép</b>
     <textarea id="copy-text" readonly></textarea>
     <div class="actions"><button class="btn" id="copy-do">Sao chép</button><button class="btn quiet" id="copy-close">Đóng</button></div>
-    <p class="muted small">Nếu nút Sao chép không chạy, nhấn giữ vào ô chữ → Chọn tất cả → Sao chép.</p>
+    <p class="muted small">Nếu không sao chép được: nhấn giữ ô chữ → Chọn tất cả → Sao chép.</p>
   </div>
 </div>
 
@@ -361,15 +368,15 @@ const BOOT={view:"",bp:""};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 /* ==== DÁN LINK /exec CỦA APPS SCRIPT VÀO GIỮA HAI DẤU NGOẶC KÉP DƯỚI ĐÂY ==== */
-const API_URL = "https://script.google.com/macros/s/AKfycbzQgF6q-2_1xeocoPbiE5EbhULFTdJUPQQ8Q65g29HJBK0Y_FAnv-9LwHzFErrau93AZA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyrGYQp5mDJD3urNgGlC4oUuF8YsT9iMvnr4lXK6Iref5DZrz9CB4qiPj2KhVsJkqc/exec";
 /* ============================================================================ */
 // Gọi máy chủ Apps Script. Gửi dạng text/plain và không kèm cookie nên không dính tài khoản Google trên trình duyệt.
 const run=(fn,...args)=>{
-  if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL))return Promise.reject(new Error("Chưa cấu hình API_URL trong index.html (phải là link kết thúc bằng /exec)"));
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL))return Promise.reject(new Error("Chưa cấu hình API_URL (link kết thúc bằng /exec)."));
   return fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn,args}),redirect:"follow",credentials:"omit"})
-    .then(r=>{if(!r.ok)throw new Error("Máy chủ trả lỗi "+r.status);return r.text()})
-    .then(t=>{let j;try{j=JSON.parse(t)}catch(_){throw new Error("Máy chủ trả dữ liệu lạ. Kiểm tra phần Triển khai: Người có quyền truy cập phải là Bất kỳ ai.")}if(!j.ok)throw new Error(j.error||"Lỗi máy chủ");return j.data})
-    .catch(e=>{const m=String(e&&e.message||e);throw new Error(/Failed to fetch|NetworkError|Load failed|network/i.test(m)?"Không kết nối được máy chủ. Kiểm tra mạng, hoặc link API_URL trong index.html.":m)});
+    .then(r=>{if(!r.ok)throw new Error("Hệ thống đang bận. Vui lòng thử lại sau.");return r.text()})
+    .then(t=>{let j;try{j=JSON.parse(t)}catch(_){throw new Error("Hệ thống đang bận. Vui lòng thử lại sau.")}if(!j.ok)throw new Error(j.error||"Hệ thống đang bận. Vui lòng thử lại sau.");return j.data})
+    .catch(e=>{const m=String(e&&e.message||e);throw new Error(/Failed to fetch|NetworkError|Load failed|network/i.test(m)?"Không kết nối được. Vui lòng kiểm tra mạng và thử lại.":m)});
 };
 const errText=e=>(e&&e.message?e.message:String(e||"Lỗi không xác định")).replace(/^Exception:\s*/,"");
 const FREQ={day:"Ngày",week:"Tuần",month:"Tháng",quarter:"Quý"};
@@ -420,41 +427,48 @@ let view="";
 document.querySelector(".nav").addEventListener("click",e=>{const b=e.target.closest("button[data-view]");if(b)show(b.dataset.view)});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-goto]");if(b)show(b.dataset.goto)});
 function show(v){
-  if(!ACC){if(!GUEST_VIEWS.includes(v)){if(v==="kiem-tra"||v==="khac-phuc"){BOOT.view=v;v="login"}else v="bao-cao"}}
-  else if(v!=="login"&&!ROLE_VIEWS[ACC.role].includes(v))v=ROLE_HOME[ACC.role];
+  if(!ACC){if(!GUEST_VIEWS.includes(v)){BOOT.view=v;v="login"}}
+  else if(v!=="login"&&!viewsOf(ACC).includes(v))v=ROLE_HOME[ACC.role];
   view=v;document.querySelectorAll(".nav button").forEach(b=>{if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
   for(const k of ["login","kiem-tra","bao-cao","khac-phuc","tieu-chuan"])$("v-"+k).hidden=k!==v;
-  if(v==="login"){$("login-title").textContent=BOOT.view==="kiem-tra"?"Đăng nhập để vào Kiểm tra":BOOT.view==="khac-phuc"?"Đăng nhập để vào Khắc phục":"Đăng nhập";setTimeout(()=>$("login-code").focus(),50)}
+  if(v==="login"){$("login-eyebrow").textContent=VIEW_NAME[BOOT.view]||"Nội bộ";$("login-note").textContent=BOOT.view==="bao-cao"?"Báo cáo là nội bộ. Vui lòng nhập mã được cấp.":"Vui lòng nhập mã được cấp.";setTimeout(()=>$("login-code").focus(),50)}
   if(v==="kiem-tra")enterKiemTra();if(v==="bao-cao")loadStatus();if(v==="khac-phuc")enterKhacPhuc();if(v==="tieu-chuan")loadStandards();window.scrollTo(0,0)}
 
 /* =================== KIỂM TRA =================== */
 // Đăng nhập bằng mã: mã ở sheet BoPhan quyết định vai trò
-const ROLE_VIEWS={inspector:["kiem-tra","bao-cao","tieu-chuan"],leader:["bao-cao","tieu-chuan"],dept:["bao-cao","khac-phuc","tieu-chuan"]};
-const GUEST_VIEWS=["bao-cao","tieu-chuan","login"]; // Báo cáo mở cho mọi người, không cần mã
-const ROLE_HOME={inspector:"kiem-tra",leader:"bao-cao",dept:"khac-phuc"};
-const ROLE_LABEL={inspector:"Tổ kiểm tra",leader:"Ban lãnh đạo",dept:"Bộ phận"};
+// Vai trò lấy từ sheet BoPhan (máy chủ kiểm tra lại mọi lệnh, trình duyệt chỉ ẩn/hiện tab):
+//  inspector = Tổ kiểm tra · leader = Ban lãnh đạo · manager = Trưởng phòng · dept = Bộ phận
+//  Báo cáo cần mã: Tổ kiểm tra, Ban lãnh đạo, Trưởng phòng luôn xem được; bộ phận chỉ khi cột "Xem báo cáo" được tích.
+const ROLE_VIEWS={inspector:["kiem-tra","bao-cao","tieu-chuan"],leader:["bao-cao","tieu-chuan"],manager:["bao-cao","khac-phuc","tieu-chuan"],dept:["khac-phuc","tieu-chuan"]};
+const viewsOf=a=>a.role==="dept"&&a.report?["bao-cao",...ROLE_VIEWS.dept]:ROLE_VIEWS[a.role];
+const GUEST_VIEWS=["tieu-chuan","login"]; // chỉ Tiêu chuẩn công khai
+const ROLE_HOME={inspector:"kiem-tra",leader:"bao-cao",manager:"bao-cao",dept:"khac-phuc"};
+const VIEW_NAME={"kiem-tra":"Kiểm tra","bao-cao":"Báo cáo","khac-phuc":"Khắc phục"};
 let ACC=ls.get("kscl:acc");if(!ACC||!ACC.code||!ROLE_VIEWS[ACC.role])ACC=null;
 let ADMIN=ACC&&ACC.role==="inspector"?ACC.code:"";
 const isInspector=()=>ACC?.role==="inspector";
+const canReport=()=>!!ACC&&viewsOf(ACC).includes("bao-cao");
+const canConfirm=i=>isInspector()||(ACC?.role==="manager"&&(ACC.depts||[]).includes(i.owner));
 function applyAcc(){
   // chưa đăng nhập: hiện đủ 3 tab, bấm Kiểm tra / Khắc phục sẽ được hỏi mã
-  document.querySelectorAll(".nav button[data-view]").forEach(b=>b.hidden=!!ACC&&!ROLE_VIEWS[ACC.role].includes(b.dataset.view));
+  document.querySelectorAll(".nav button[data-view]").forEach(b=>b.hidden=!!ACC&&!viewsOf(ACC).includes(b.dataset.view));
   $("logout").hidden=false;$("logout").textContent="Đăng nhập";
   const cur=$("login-current");cur.hidden=!ACC;
-  cur.innerHTML=ACC?`Đang đăng nhập: <b>${esc(ACC.role==="dept"?ACC.bp:ROLE_LABEL[ACC.role])}</b>${ACC.person?" · "+esc(ACC.person):""}. Nhập mã khác để đổi, hoặc <button class="btn sm" data-goto="${ROLE_HOME[ACC.role]}">Tiếp tục</button> <button class="btn quiet sm" id="logout-real">Đăng xuất</button>`:"";
+  cur.innerHTML=ACC?`<div>Đang dùng: <b>${esc(ACC.name)}</b>${ACC.person?" · "+esc(ACC.person):""}</div><div class="actions" style="margin-top:8px"><button class="btn sm" data-goto="${ROLE_HOME[ACC.role]}">Tiếp tục</button><button class="btn quiet sm" id="logout-real">Đăng xuất</button></div>`:"";
   const lo=$("logout-real");if(lo)lo.onclick=()=>logout();
-  $("who").textContent=ACC?(ACC.role==="dept"?ACC.bp:ROLE_LABEL[ACC.role])+(ACC.person?" · "+ACC.person:""):"";
+  $("who").textContent=ACC?ACC.name+(ACC.person?" · "+ACC.person:""):"";
   ADMIN=isInspector()?ACC.code:"";
-  DEPT=ACC&&ACC.role==="dept"?{bp:ACC.bp,pin:ACC.code,name:ACC.person||""}:null;
+  DEPT=ACC&&(ACC.role==="dept"||ACC.role==="manager")?{bp:ACC.bp,pin:ACC.code,name:ACC.person||"",manager:ACC.role==="manager"}:null;
+  if(!canReport()){STATUS=null;$("nav-count").hidden=true}
 }
-function logout(msg){ACC=null;ls.del("kscl:acc");CR=null;KP=null;applyAcc();if(msg){toast(msg);show("login")}else show("bao-cao")}
+function logout(msg){ACC=null;ls.del("kscl:acc");CR=null;KP=null;STATUS=null;applyAcc();if(msg)toast(msg);BOOT.view="";show("login")}
 $("logout").onclick=()=>{BOOT.view="";show("login")};
 $("login-name").value=ls.get("kscl:person")||"";
 $("login-go").onclick=async()=>{const code=$("login-code").value.trim(),person=$("login-name").value.trim();
-  if(!code){toast("Nhập mã truy cập");$("login-code").focus();return}
+  if(!code){toast("Vui lòng nhập mã.");$("login-code").focus();return}
   const b=$("login-go");b.disabled=true;
-  try{const a=await run("loginCode",code);ACC={code,role:a.role,bp:a.bp,name:a.name,person};ls.set("kscl:acc",ACC);if(person){ls.set("kscl:person",person);ls.set("kscl:inspector",person)}
-    $("login-code").value="";applyAcc();show(ROLE_VIEWS[ACC.role].includes(BOOT.view)?BOOT.view:ROLE_HOME[ACC.role])}
+  try{const a=await run("loginCode",code);ACC={code,role:a.role,bp:a.bp,name:a.name,phong:a.phong||"",depts:a.depts||[],report:!!a.report,person};ls.set("kscl:acc",ACC);if(person){ls.set("kscl:person",person);ls.set("kscl:inspector",person)}
+    $("login-code").value="";STATUS=null;KP=null;CR=null;applyAcc();show(viewsOf(ACC).includes(BOOT.view)?BOOT.view:ROLE_HOME[ACC.role]);if(view!=="bao-cao")refreshCount()}
   catch(e){toast(errText(e))}b.disabled=false};
 ["login-code","login-name"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")$("login-go").click()}));
 const authErr=m=>/Mã không đúng|không có quyền/.test(m);
@@ -463,7 +477,7 @@ function enterKiemTra(){
   if(!$("m-inspector").value.trim()&&ACC.person)$("m-inspector").value=ACC.person;
   if(!CR)loadConfig();
 }
-const adminErr=e=>{const m=errText(e);if(authErr(m))logout("Mã đã được đổi, hãy đăng nhập lại");else toast(m)};
+const adminErr=e=>{const m=errText(e);if(authErr(m))logout("Mã đã thay đổi. Vui lòng đăng nhập lại.");else toast(m)};
 
 $("m-date").value=isoDate(new Date());
 $("m-inspector").value=ls.get("kscl:inspector")||"";
@@ -481,9 +495,9 @@ loadDraft();
 function loadConfig(){
   return run("getConfig",ACC.code).then(c=>{
     CR=c;$("hd-eyebrow").textContent=`KSCL Showroom · ${c.showroom} · ${c.model}`;
-    if(c.warnings?.length){$("warn").textContent="Bộ tiêu chí trong Google Sheet có chỗ cần sửa: "+c.warnings.slice(0,3).join("; ");$("warn").hidden=false}
+    if(c.warnings?.length){$("warn").textContent="Tiêu chí trong Google Sheet cần xem lại: "+c.warnings.slice(0,3).join("; ");$("warn").hidden=false}
     renderStaff();
-  }).catch(e=>{if(authErr(errText(e)))return adminErr(e);$("groups").innerHTML=`<div class="empty">Không tải được bộ tiêu chí: ${esc(errText(e))}</div>`;$("progress").textContent=""});
+  }).catch(e=>{if(authErr(errText(e)))return adminErr(e);$("groups").innerHTML=`<div class="empty">Chưa tải được tiêu chí. ${esc(errText(e))}</div>`;$("progress").textContent=""});
 }
 function instances(){
   if(!CR)return[];const out=[];
@@ -504,7 +518,7 @@ function crHTML(ins,c){
   const sw=ins.car&&/phần mềm/i.test(c.text)&&ins.car.expected?` <span class="muted">(bản chuẩn: <span class="num">${esc(ins.car.expected)}</span>)</span>`:"";
   return `<li class="cr" data-cid="${esc(c.id)}"><div class="t">${esc(c.text)}${sw}
     <div class="tags"><span class="tag">${FREQ[c.freq]}</span><span class="tag">${esc(c.owner)}</span>${c.ref?`<span class="tag">${esc(c.ref)}</span>`:""}</div>
-    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi: vị trí, tình trạng…" aria-label="Ghi chú lỗi">`:""}</div>
+    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:""}</div>
     <div class="seg" role="group" aria-label="Kết quả">${[["y","Đạt"],["n","Không"],["x","Bỏ qua"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${pr(v)}">${l}</button>`).join("")}</div></li>`;
 }
 function cardHTML(ins){
@@ -512,10 +526,10 @@ function cardHTML(ins){
   return `<div class="card" data-key="${esc(ins.key)}" data-st="${st}">
     <div class="card-top"><div><h3>${esc(ins.title)}</h3>${ins.sub?`<div class="sub">${esc(ins.sub)}</div>`:""}</div>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${sc.u?`<button class="allok" data-allok>Đạt hết ${sc.u} mục còn lại</button>`:""}<span class="chip ${st||"na"}">${sc.p==null?"Chưa chấm":pctTxt(sc.p)}</span></div></div>
-    ${(ins.cp.samples||[]).length?`<div class="samples"><div class="eyebrow">Mẫu chuẩn VinFast · bấm để xem lớn</div><div class="row">${ins.cp.samples.map((x,k)=>`<button data-sample="${k}" aria-label="Xem ảnh mẫu: ${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,300)}" alt="${esc(x.caption)}"><span class="cap">${esc(x.caption)}</span></button>`).join("")}</div></div>`:""}
+    ${(ins.cp.samples||[]).length?`<div class="samples"><div class="eyebrow">Mẫu chuẩn VinFast</div><div class="row">${ins.cp.samples.map((x,k)=>`<button data-sample="${k}" aria-label="Xem ảnh mẫu: ${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,300)}" alt="${esc(x.caption)}"><span class="cap">${esc(x.caption)}</span></button>`).join("")}</div></div>`:""}
     <ul class="crit">${ins.crit.map(c=>crHTML(ins,c)).join("")}</ul>
     ${ins.cp.guide?`<div class="guide">Cách chụp: ${esc(ins.cp.guide)}</div>`:""}
-    <div class="photos">${ph.map((p,i)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh ${i+1}">`:(p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:"")}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải lên…":"Lỗi, bấm × rồi thử lại"}</span>`:""}<button data-del="${i}" aria-label="Xóa ảnh">×</button></div>`).join("")}
+    <div class="photos">${ph.map((p,i)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh ${i+1}">`:(p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:"")}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi, xóa và chụp lại"}</span>`:""}<button data-del="${i}" aria-label="Xóa ảnh">×</button></div>`).join("")}
       <label class="pick"><span class="plus">+</span>Thêm ảnh<input type="file" accept="image/*" multiple></label></div>
   </div>`;
 }
@@ -523,11 +537,11 @@ function renderStaff(){
   $("period").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===period)));
   if(!CR)return;
   const ins=instances();
-  $("period-note").textContent=`Kỳ ${FREQ_LONG[period]}: ${ins.reduce((a,i)=>a+i.crit.length,0)} tiêu chí trên ${ins.length} thẻ${period==="month"?" (toàn bộ tiêu chí)":period==="week"?" (mục ngày + tuần)":""}.`;
+  $("period-note").textContent=`${ins.reduce((a,i)=>a+i.crit.length,0)} tiêu chí · ${ins.length} thẻ${period==="month"?" · toàn bộ tiêu chí":period==="week"?" · mục ngày và tuần":""}`;
   $("groups").innerHTML=Object.entries(CR.groups).map(([g,name])=>{
     const list=ins.filter(i=>i.cp.group===g);if(!list.length)return"";const a=score(list);
     return `<section class="grp" data-g="${g}"><div class="grp-h"><h2><span class="code">${g}</span>${esc(name)}</h2><span class="chip ${a.p==null?"na":stOf(a.p)}">${pctTxt(a.p)}</span></div>${list.map(cardHTML).join("")}</section>`;
-  }).join("")||`<div class="empty">Không có tiêu chí nào cho kỳ này. Kiểm tra cột "Đang dùng" và "Tần suất" trong Google Sheet.</div>`;
+  }).join("")||`<div class="empty">Kỳ này chưa có tiêu chí. Vui lòng kiểm tra cột "Đang dùng" và "Tần suất" trong Google Sheet.</div>`;
   renderReport();
 }
 function rerenderCard(key){
@@ -548,29 +562,30 @@ const dueTxt=(iso,ref)=>iso===ref?"trong ngày":"trước "+vn(iso);
 const fixLink=o=>location.origin+location.pathname+"?trang=khac-phuc";
 function ownerMsg(owner,list,date){
   const insp=$("m-inspector").value.trim(),link=fixLink(owner);
-  return `[KSCL Showroom ${vn(date)}] Gửi bộ phận ${owner}:\nKết quả kiểm tra có ${list.length} mục chưa đạt, nhờ anh/chị xử lý:\n`+
+  return `[KSCL ${vn(date)}] Kính gửi ${owner},\n${list.length} hạng mục chưa đạt, nhờ anh/chị khắc phục:\n`+
     list.map((i,k)=>`${k+1}. ${i.area}: ${i.text}${i.note?` (${i.note})`:""} — hạn ${dueTxt(i.due,date)}`).join("\n")+
-    (link?`\n\nXem ảnh lỗi, ảnh mẫu chuẩn và báo khắc phục tại:\n${link}\n(đăng nhập bằng mã của bộ phận)`:"")+
-    `\nCảm ơn anh/chị!${insp?"\n— "+insp:""}`;
+    (link?`\n\nXem ảnh và báo khắc phục (đăng nhập bằng mã bộ phận):\n${link}`:"")+
+    `\nCảm ơn anh/chị.${insp?"\n— "+insp:""}`;
 }
 function renderReport(){
   if(!CR)return;
   const ins=instances(),all=score(ins),date=$("m-date").value;
   $("progress").innerHTML=`<b class="num">${all.y+all.n}</b>/${all.y+all.n+all.u} đã chấm · <span style="color:var(--bad)" class="num">${all.n} không đạt</span>`;$("progress-bar").style.width=((all.y+all.n+all.u)?Math.round((all.y+all.n)/(all.y+all.n+all.u)*100):0)+"%";
-  $("tally").innerHTML=`<div class="first"><span class="eyebrow">Chung</span><b>${pctTxt(all.p)}</b><span class="chip ${all.p==null?"na":stOf(all.p)}" style="align-self:flex-start">${ST[all.p==null?"na":stOf(all.p)]}</span></div>`+
-    Object.entries(CR.groups).map(([g,name])=>{const a=score(ins.filter(i=>i.cp.group===g));return `<div title="${esc(name)}"><span class="eyebrow">${g}</span><b>${pctTxt(a.p)}</b></div>`}).join("");
-  $("unresolved").innerHTML=all.u?`<span class="muted">Còn <b class="num">${all.u}</b> tiêu chí chưa chấm. Có thể lưu dở dang và lưu lại sau, không bị trùng.</span>`:`<span style="color:var(--ok)">Đã chấm đủ ${all.y+all.n} tiêu chí.</span>`;
+  const tone=p=>({dat:"ok",can:"warn",khong:"bad",na:""})[p==null?"na":stOf(p)];
+  $("tally").innerHTML=`<div class="acc"><span class="lb2">Chung</span><b>${pctTxt(all.p)}</b><span class="sm2">${ST[all.p==null?"na":stOf(all.p)]}</span></div>`+
+    Object.entries(CR.groups).map(([g,name])=>{const a=score(ins.filter(i=>i.cp.group===g));return `<div class="${tone(a.p)}" title="${esc(name)}"><span class="lb2">Phần ${g}</span><b>${pctTxt(a.p)}</b></div>`}).join("");
+  $("unresolved").innerHTML=all.u?`<span class="muted">Còn <b class="num">${all.u}</b> tiêu chí chưa chấm. Có thể lưu trước, lưu lại sau.</span>`:`<span style="color:var(--ok)">Đã chấm đủ ${all.y+all.n} tiêu chí.</span>`;
   const iss=issuesNow();
-  $("issues").innerHTML=iss.length?byKey(iss,"owner").sort((a,b)=>b[1].length-a[1].length).map(([o,l])=>`<div class="owner"><div class="owner-h"><b>${esc(o)}</b><span class="chip khong">${l.length} mục</span></div><ol>${l.map(i=>`<li>${esc(i.area)}: ${esc(i.text)}${i.note?` <span class="muted">— ${esc(i.note)}</span>`:""} <span class="due">${dueTxt(i.due,date)}</span></li>`).join("")}</ol><button class="btn ghost sm" data-copy-owner="${esc(o)}" style="align-self:flex-start">Sao chép yêu cầu gửi ${esc(o)}</button></div>`).join("")
-    :`<div class="empty">Chưa có mục nào không đạt.</div>`;
-  $("scale-note").textContent=`Tỷ lệ đạt = Đạt / (Đạt + Không đạt); mục "Bỏ qua" không tính. Đạt từ ${CR.thresholds.pass}%, Cần cải thiện từ ${CR.thresholds.warn}%. Bài kiểm đang được lưu nháp trên máy này.`;
+  $("issues").innerHTML=iss.length?byKey(iss,"owner").sort((a,b)=>b[1].length-a[1].length).map(([o,l])=>`<div class="owner"><div class="owner-h"><b>${esc(o)}</b><span class="chip khong">${l.length} mục</span></div><ol>${l.map(i=>`<li>${esc(i.area)}: ${esc(i.text)}${i.note?` <span class="muted">— ${esc(i.note)}</span>`:""} <span class="due">${dueTxt(i.due,date)}</span></li>`).join("")}</ol><button class="btn ghost sm" data-copy-owner="${esc(o)}" style="align-self:flex-start">Sao chép tin nhắn</button></div>`).join("")
+    :`<div class="empty">Chưa có hạng mục chưa đạt.</div>`;
+  $("scale-note").textContent=`Tỷ lệ đạt = Đạt / (Đạt + Không). "Bỏ qua" không tính. Đạt từ ${CR.thresholds.pass}%, cần cải thiện từ ${CR.thresholds.warn}%. Nháp tự lưu trên máy này.`;
   $("save-rep").disabled=!(all.y+all.n);
 }
 $("period").addEventListener("click",e=>{const b=e.target.closest("button[data-p]");if(!b)return;period=b.dataset.p;ls.set("kscl:period",period);loadDraft();renderStaff()});
 $("jump-report").onclick=()=>$("report").scrollIntoView({behavior:"smooth"});
 $("v-kiem-tra").addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;
-  if(b.dataset.copyOwner){const o=b.dataset.copyOwner;openCopy("Gửi "+o,ownerMsg(o,issuesNow().filter(i=>i.owner===o),$("m-date").value));return}
+  if(b.dataset.copyOwner){const o=b.dataset.copyOwner;openCopy("Tin nhắn gửi "+o,ownerMsg(o,issuesNow().filter(i=>i.owner===o),$("m-date").value));return}
   const card=b.closest(".card");if(!card)return;const key=card.dataset.key,r=resOf(key);
   if(b.dataset.sample!==undefined){const ins=instances().find(i=>i.key===key);lbOpen(ins.cp.samples,+b.dataset.sample);return}
   if(b.dataset.del!==undefined){const p=photosOf(key).splice(+b.dataset.del,1)[0];if(p?.id)run("deletePhoto",ADMIN,p.id).catch(()=>{});saveDraft();rerenderCard(key);return}
@@ -605,105 +620,112 @@ function reportData(){
     issues:issuesNow()};
 }
 $("save-rep").onclick=async()=>{
-  const d=reportData();if(!d.inspector){toast("Nhập tên người kiểm tra trước khi lưu");$("m-inspector").focus();window.scrollTo(0,0);return}
-  if(Object.values(D.photos).some(l=>l.some(p=>p.status==="up"))){toast("Đợi ảnh tải lên xong rồi lưu");return}
+  const d=reportData();if(!d.inspector){toast("Vui lòng nhập người kiểm tra.");$("m-inspector").focus();window.scrollTo(0,0);return}
+  if(d.issues.some(i=>!i.note)){toast("Vui lòng ghi chú cho mục Không đạt.");document.querySelector("input.note:placeholder-shown")?.focus();return}
+  if(Object.values(D.photos).some(l=>l.some(p=>p.status==="up"))){toast("Vui lòng chờ ảnh tải xong.");return}
   const b=$("save-rep");b.disabled=true;b.textContent="Đang lưu…";
-  try{const r=await run("saveReport",ADMIN,d);toast("Đã lưu"+(r.closed?` · tự đóng ${r.closed} lỗi cũ đã đạt`:"")+". Trang Báo cáo đã cập nhật.");STATUS=null;refreshCount()}
+  try{const r=await run("saveReport",ADMIN,d);toast("Đã lưu"+(r.closed?` · đóng ${r.closed} lỗi cũ đã đạt`:"")+".");STATUS=null;refreshCount()}
   catch(e){adminErr(e)}
-  b.textContent="Lưu kết quả kiểm tra";renderReport();
+  b.textContent="Lưu kết quả";renderReport();
 };
 
 /* =================== BÁO CÁO =================== */
 let STATUS=null,timer=null;
 async function loadStatus(quiet){
+  if(!canReport())return;
   if(!quiet&&!STATUS)$("bc-list").innerHTML=`<div class="empty">Đang tải…</div>`;
-  try{STATUS=await run("getStatus",ACC?ACC.code:"");renderStatus();setCount()}catch(e){if(!quiet)$("bc-list").innerHTML=`<div class="empty">Không tải được: ${esc(errText(e))}</div>`}
+  try{STATUS=await run("getStatus",ACC.code);renderStatus();setCount()}catch(e){const m=errText(e);if(authErr(m))return adminErr(e);
+    if(/chưa được cấp quyền xem Báo cáo/.test(m)){ACC.report=false;ls.set("kscl:acc",ACC);applyAcc();toast(m);return show(ROLE_HOME[ACC.role])}if(!quiet)$("bc-list").innerHTML=`<div class="empty">Chưa tải được. ${esc(m)}</div>`}
   clearTimeout(timer);timer=setTimeout(()=>{if(view==="bao-cao"&&!document.hidden)loadStatus(true);else timer=setTimeout(()=>loadStatus(true),60000)},60000);
 }
-async function refreshCount(){try{STATUS=await run("getStatus",ACC?ACC.code:"");setCount();if(view==="bao-cao")renderStatus()}catch(_){}}
-function setCount(){const n=STATUS?.issues.length||0;$("nav-count").hidden=!n;$("nav-count").textContent=n}
+async function refreshCount(){if(!canReport())return;try{STATUS=await run("getStatus",ACC.code);setCount();if(view==="bao-cao")renderStatus()}catch(_){}}
+function setCount(){const n=canReport()?STATUS?.issues.length||0:0;$("nav-count").hidden=!n;$("nav-count").textContent=n}
 $("bc-reload").onclick=()=>loadStatus();
 ["f-group","f-owner","f-status"].forEach(id=>$(id).addEventListener("change",renderStatus));
 function filters(){return{group:$("f-group").value,owner:$("f-owner").value,status:$("f-status").value}}
 function fillSelect(sel,values,label){const cur=sel.value;sel.innerHTML=`<option value="">${label}</option>`+values.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join("");if(values.some(([v])=>v===cur))sel.value=cur}
 function issueCard(i,mode){
   const today=STATUS.today,late=i.status===OPEN&&i.due<today;
-  const adminCtl=mode==="report"&&isInspector()?`<div class="actions"><input type="text" class="rv" placeholder="Ý kiến (bắt buộc khi Chưa đạt)" style="flex:1;min-width:160px"><button class="btn sm" data-ok="${i.row}">Xác nhận đạt</button><button class="btn ghost sm" data-no="${i.row}">Chưa đạt, trả lại</button></div>`:"";
+  const adminCtl=mode==="report"&&canConfirm(i)?`<div class="actions"><input type="text" class="rv" placeholder="Ý kiến (bắt buộc khi trả lại)"><button class="btn sm" data-ok="${i.row}">Xác nhận đạt</button><button class="btn ghost sm" data-no="${i.row}">Trả lại</button></div>`:"";
   return `<div class="iss${i.status===WAIT?" wait":""}" data-row="${i.row}" data-id="${esc(i.id)}" data-rep="${esc(i.report)}">
     <div class="top"><div style="min-width:0"><b>${esc(i.area)}</b><div style="font-size:.92rem">${esc(i.text)}</div></div><span class="status ${i.status===WAIT?"wait":"open"}">${esc(i.status)}</span></div>
     <div class="meta2"><span>${esc(i.owner)}</span><span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${late?" · quá hạn":""}</span></div>
     ${i.note?`<div class="small">Lỗi: ${esc(i.note)}</div>`:""}
-    ${i.review&&i.status===OPEN?`<div class="rev">Lý do chưa đạt: ${esc(i.review)}</div>`:""}
-    ${i.fix?`<div class="fix"><b>Đã khắc phục:</b> ${esc(i.fix)} <span class="muted small">— ${esc(i.fixBy)}, ${esc(i.fixAt)}</span></div>`:""}
+    ${i.review&&i.status===OPEN?`<div class="rev">Lý do trả lại: ${esc(i.review)}</div>`:""}
+    ${i.fix?`<div class="fix"><b>Khắc phục:</b> ${esc(i.fix)} <span class="muted small">— ${esc(i.fixBy)}, ${esc(i.fixAt)}</span></div>`:""}
     ${trioHTML(i,mode)}
     ${adminCtl}
   </div>`;
 }
 function renderStatus(){
   if(!STATUS)return;const s=STATUS,today=s.today,last=s.reports[0];
-  $("bc-time").textContent=`Cập nhật lúc ${s.now} · tự làm mới mỗi phút`;
-  $("bc-eyebrow").textContent=`Báo cáo tình trạng · ${s.showroom} · ${s.model}`;
-  fillSelect($("f-group"),Object.entries(s.groups).map(([g,n])=>[g,g+". "+n]),"Tất cả phần");
-  fillSelect($("f-owner"),[...new Set(s.issues.map(i=>i.owner))].sort().map(o=>[o,o]),"Tất cả bộ phận");
+  $("bc-time").textContent=`Cập nhật ${s.now} · tự làm mới mỗi phút`;
+  $("bc-eyebrow").textContent=`Hạng mục chưa đạt · ${s.model}`;
+  fillSelect($("f-group"),Object.entries(s.groups).map(([g,n])=>[g,g+". "+n]),"Tất cả");
+  fillSelect($("f-owner"),[...new Set(s.issues.map(i=>i.owner))].sort().map(o=>[o,o]),"Tất cả");
   const f=filters(),list=s.issues.filter(i=>(!f.group||i.group===f.group)&&(!f.owner||i.owner===f.owner)&&(!f.status||i.status===f.status));
   const late=list.filter(i=>i.status===OPEN&&i.due<today).length,wait=list.filter(i=>i.status===WAIT).length;
-  $("bc-kpi").innerHTML=`<div class="bad"><span class="eyebrow">Chưa đạt</span><b>${list.length}</b></div><div class="bad"><span class="eyebrow">Quá hạn</span><b>${late}</b></div><div class="warn"><span class="eyebrow">Chờ xác nhận</span><b>${wait}</b></div>`+
-    `<div><span class="eyebrow">Lần kiểm gần nhất</span><b>${last?pctTxt(last.overall):"–"}</b><span class="small muted">${last?vn(last.date)+" · kỳ "+esc(last.period):"Chưa có"}</span></div>`;
-  $("bc-groups").innerHTML=`<div class="first"><span class="eyebrow">Tỷ lệ đạt</span><b style="font-size:1rem">${last?vn(last.date):"–"}</b></div>`+Object.entries(s.groups).map(([g,n])=>{const x=last?last.groups[g]:null,c=s.issues.filter(i=>i.group===g).length;return `<div title="${esc(n)}"><span class="eyebrow">${g}</span><b class="${stOf(x)==="khong"?"":""}">${pctTxt(x)}</b><span class="small muted">${c} việc mở</span></div>`}).join("");
+  const tone=p=>({dat:"ok",can:"warn",khong:"bad",na:""})[stOf(p)];
+  $("bc-kpi").innerHTML=`<div class="bad"><span class="lb2">Chưa đạt</span><b>${list.length}</b></div><div class="bad"><span class="lb2">Quá hạn</span><b>${late}</b></div><div class="warn"><span class="lb2">Chờ xác nhận</span><b>${wait}</b></div>`+
+    `<div class="${last?tone(last.overall):""}"><span class="lb2">Lần kiểm gần nhất</span><b>${last?pctTxt(last.overall):"–"}</b><span class="sm2">${last?vn(last.date)+" · "+esc(last.period):"Chưa có"}</span></div>`;
+  $("bc-groups").innerHTML=`<div class="acc"><span class="lb2">Tỷ lệ đạt</span><b style="font-size:1.1rem">${last?vn(last.date):"–"}</b></div>`+Object.entries(s.groups).map(([g,n])=>{const x=last?last.groups[g]:null,c=s.issues.filter(i=>i.group===g).length;return `<div class="${tone(x)}" title="${esc(n)}"><span class="lb2">Phần ${g}</span><b>${pctTxt(x)}</b><span class="sm2">${c} lỗi mở</span></div>`}).join("");
   $("bc-list").innerHTML=list.length?Object.entries(s.groups).map(([g,n])=>{const gl=list.filter(i=>i.group===g).sort((a,b)=>a.due<b.due?-1:1);if(!gl.length)return"";
     return `<section class="grp"><div class="grp-h"><h2><span class="code">${g}</span>${esc(n)}</h2><span class="chip khong">${gl.length} mục</span></div>${gl.map(i=>issueCard(i,"report")).join("")}</section>`}).join("")
-    :`<div class="empty">${s.issues.length?"Không có mục nào khớp bộ lọc.":"Không còn hạng mục nào chưa đạt."}</div>`;
-  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.inspector)}</td><td><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num">${r.y} / ${r.n}</td></tr>`).join(""):`<tr><td colspan="5" class="muted">Chưa có lần kiểm nào được lưu.</td></tr>`;
+    :`<div class="empty">${s.issues.length?"Không có mục phù hợp bộ lọc.":"Không còn hạng mục chưa đạt."}</div>`;
+  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.inspector)}</td><td class="r"><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num r">${r.y} / ${r.n}</td></tr>`).join(""):`<tr><td colspan="5" class="muted">Chưa có lần kiểm.</td></tr>`;
 }
 $("v-bao-cao").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;
   if(b.dataset.trio!==undefined){const i=STATUS.issues.find(x=>String(x.row)===b.dataset.row);lbOpen(trioList(i),+b.dataset.trio);return}
   const card=b.closest(".iss");if(!card||!(b.dataset.ok||b.dataset.no))return;
   const ok=!!b.dataset.ok,cm=card.querySelector(".rv").value.trim();
-  if(!ok&&!cm){toast("Ghi lý do chưa đạt");card.querySelector(".rv").focus();return}
+  if(!ok&&!cm){toast("Vui lòng ghi lý do trả lại.");card.querySelector(".rv").focus();return}
   b.disabled=true;
-  const cm2=(cm?cm+" — ":"")+(ACC?.person||"Tổ kiểm tra");
-  try{STATUS=await run("confirmIssue",ADMIN,+card.dataset.row,card.dataset.id,card.dataset.rep,ok,cm2);renderStatus();setCount();toast(ok?"Đã xác nhận đạt":"Đã trả lại cho bộ phận")}
+  const cm2=(cm?cm+" — ":"")+(ACC.person||ACC.name);
+  try{STATUS=await run("confirmIssue",ACC.code,+card.dataset.row,card.dataset.id,card.dataset.rep,ok,cm2);renderStatus();setCount();toast(ok?"Đã xác nhận đạt.":"Đã trả lại bộ phận.")}
   catch(err){adminErr(err);loadStatus(true)}
 });
-$("bc-pdf").onclick=async()=>{const b=$("bc-pdf"),st=$("bc-pdf-st");b.disabled=true;st.textContent="Đang tạo PDF kèm ảnh, thường 20–60 giây…";
-  try{const r=await run("exportStatusPdf",ACC?ACC.code:"",filters());st.innerHTML=`Đã tạo <a href="${esc(r.url)}">${esc(r.name)}</a> (${r.count} mục). Mở link rồi bấm chia sẻ hoặc tải về để gửi.`}
-  catch(e){st.textContent="Chưa tạo được PDF: "+errText(e)}b.disabled=false};
+$("bc-pdf").onclick=async()=>{if(!canReport())return;const b=$("bc-pdf"),st=$("bc-pdf-st");b.disabled=true;st.textContent="Đang tạo PDF (20–60 giây)…";
+  try{const r=await run("exportStatusPdf",ACC.code,filters());st.innerHTML=`Đã tạo <a href="${esc(r.url)}">${esc(r.name)}</a> · ${r.count} mục.`}
+  catch(e){st.textContent="Chưa tạo được PDF. "+errText(e)}b.disabled=false};
 
 /* =================== KHẮC PHỤC =================== */
-let DEPT=null,KP=null,kpGroup="",FIXDRAFT={};
+let DEPT=null,KP=null,kpGroup="",kpOwner="",FIXDRAFT={};
 function enterKhacPhuc(){$("kp-body").hidden=false;loadDept()}
 $("kp-reload").onclick=()=>loadDept();
 async function loadDept(){
-  if(!DEPT)return;$("kp-title").textContent=DEPT.bp;
+  if(!DEPT)return;$("kp-title").textContent=DEPT.manager?ACC.name:DEPT.bp;$("kp-owner-wrap").hidden=!DEPT.manager;
   if(!KP)$("kp-list").innerHTML=`<div class="empty">Đang tải…</div>`;
-  try{KP=await run("getDeptIssues",DEPT.bp,DEPT.pin);renderDept()}catch(e){const m=errText(e);if(authErr(m)){logout("Mã đã được đổi, hãy đăng nhập lại")}else $("kp-list").innerHTML=`<div class="empty">Không tải được: ${esc(m)}</div>`}
+  try{KP=await run("getDeptIssues",DEPT.bp,DEPT.pin);renderDept()}catch(e){const m=errText(e);if(authErr(m)){logout("Mã đã thay đổi. Vui lòng đăng nhập lại.")}else $("kp-list").innerHTML=`<div class="empty">Chưa tải được. ${esc(m)}</div>`}
 }
 $("kp-groups").addEventListener("click",e=>{const b=e.target.closest("button[data-g]");if(!b)return;kpGroup=b.dataset.g;$("kp-area").value="";renderDept()});
 $("kp-area").addEventListener("change",renderDept);
+$("kp-owner").addEventListener("change",e=>{kpOwner=e.target.value;renderDept()});
 function renderDept(){
-  if(!KP)return;const all=KP.issues,today=KP.today;
+  if(!KP)return;const today=KP.today;
+  if(DEPT.manager){const os=[...new Set(KP.issues.map(i=>i.owner))].sort();fillSelect($("kp-owner"),os.map(o=>[o,o]),"Tất cả");if(!os.includes(kpOwner))kpOwner="";$("kp-owner").value=kpOwner}
+  const all=KP.issues.filter(i=>!kpOwner||i.owner===kpOwner);
   const open=all.filter(i=>i.status===OPEN).length,wait=all.length-open;
   $("kp-count").textContent=(DEPT.name?DEPT.name+" · ":"")+(all.length?`${open} cần khắc phục · ${wait} chờ xác nhận`:"không còn việc cần khắc phục");
   const groups=Object.entries(KP.groups).filter(([g])=>all.some(i=>i.group===g));
   $("kp-groups").innerHTML=[["","Tất cả ("+all.length+")"],...groups.map(([g,n])=>[g,`${g}. ${n} (${all.filter(i=>i.group===g).length})`])].map(([g,l])=>`<button data-g="${g}" aria-pressed="${g===kpGroup}">${esc(l)}</button>`).join("");
   const inG=all.filter(i=>!kpGroup||i.group===kpGroup);
   const areas=[...new Set(inG.map(i=>i.cpName||i.area))].sort();
-  fillSelect($("kp-area"),areas.map(a=>[a,a]),"Tất cả vị trí");
+  fillSelect($("kp-area"),areas.map(a=>[a,a]),"Tất cả");
   const a=$("kp-area").value,list=inG.filter(i=>!a||(i.cpName||i.area)===a).sort((x,y)=>(x.status===y.status?0:x.status===OPEN?-1:1)||(x.due<y.due?-1:1));
   $("kp-list").innerHTML=list.length?list.map(i=>{const late=i.status===OPEN&&i.due<today,dr=FIXDRAFT[i.row]||(FIXDRAFT[i.row]={text:i.fix||"",photos:[]});
     return `<div class="iss${i.status===WAIT?" wait":""}" data-row="${i.row}" data-id="${esc(i.id)}" data-rep="${esc(i.report)}">
       <div class="top"><div style="min-width:0"><span class="eyebrow">${i.group}${i.cpName?" · "+esc(i.cpName):""}</span><br><b>${esc(i.area)}</b><div style="font-size:.92rem">${esc(i.text)}</div></div><span class="status ${i.status===WAIT?"wait":"open"}">${esc(i.status)}</span></div>
-      <div class="meta2"><span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${late?" · quá hạn":""}</span></div>
-      ${i.note?`<div class="small">Lỗi ghi nhận: ${esc(i.note)}</div>`:""}
+      <div class="meta2">${DEPT.manager?`<span>${esc(i.owner)}</span>`:""}<span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${late?" · quá hạn":""}</span></div>
+      ${i.note?`<div class="small">Lỗi: ${esc(i.note)}</div>`:""}
       ${i.review&&i.status===OPEN?`<div class="rev">Người kiểm trả lại: ${esc(i.review)}</div>`:""}
       ${trioHTML(i,"dept")}
-      <label class="f">Đã khắc phục như thế nào<textarea class="fx" rows="2" placeholder="VD: Đã lau sạch kính, thay 2 bóng đèn cháy ở trần khu trưng bày">${esc(dr.text)}</textarea></label>
-      <div class="photos">${dr.photos.map((p,k)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh khắc phục ${k+1}">`:""}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải lên…":"Lỗi"}</span>`:""}<button data-fdel="${k}" aria-label="Xóa ảnh">×</button></div>`).join("")}
-        <label class="pick"><span class="plus">+</span>Ảnh sau khi sửa<input type="file" accept="image/*" multiple class="fxfile"></label></div>
-      <div class="actions"><button class="btn" data-send>${i.status===WAIT?"Cập nhật khắc phục":"Báo đã khắc phục"}</button>${i.status===WAIT?`<span class="small muted">Đã gửi lúc ${esc(i.fixAt)}, đang chờ người kiểm xác nhận</span>`:""}</div>
+      <label class="f"><span>Nội dung khắc phục <span class="req">*</span></span><textarea class="fx" rows="2" placeholder="Đã lau kính, thay 2 bóng đèn trần">${esc(dr.text)}</textarea></label>
+      <div class="photos">${dr.photos.map((p,k)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh khắc phục ${k+1}">`:""}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi"}</span>`:""}<button data-fdel="${k}" aria-label="Xóa ảnh">×</button></div>`).join("")}
+        <label class="pick"><span class="plus">+</span>Ảnh sau sửa<input type="file" accept="image/*" multiple class="fxfile"></label></div>
+      <div class="actions"><button class="btn" data-send>${i.status===WAIT?"Cập nhật khắc phục":"Báo đã khắc phục"}</button>${i.status===WAIT?`<span class="small muted">Đã gửi ${esc(i.fixAt)} · chờ xác nhận</span>`:""}</div>
     </div>`}).join("")
-    :`<div class="empty">${all.length?"Không có mục nào ở vị trí này.":"Bộ phận "+esc(DEPT.bp)+" không còn hạng mục nào cần khắc phục."}</div>`;
+    :`<div class="empty">${all.length?"Không có mục ở vị trí này.":"Không còn hạng mục cần khắc phục."}</div>`;
 }
 $("kp-list").addEventListener("input",e=>{if(!e.target.classList.contains("fx"))return;const row=e.target.closest(".iss").dataset.row;(FIXDRAFT[row]||(FIXDRAFT[row]={text:"",photos:[]})).text=e.target.value});
 $("kp-list").addEventListener("change",async e=>{
@@ -720,14 +742,14 @@ $("kp-list").addEventListener("click",async e=>{
   if(b.dataset.trio!==undefined){const i=KP.issues.find(x=>String(x.row)===row);lbOpen(trioList(i),+b.dataset.trio);return}
   if(b.dataset.fdel!==undefined){dr.photos.splice(+b.dataset.fdel,1);renderDept();return}
   if(b.hasAttribute("data-send")){
-    if(!dr.text.trim()){toast("Ghi nội dung đã khắc phục");card.querySelector(".fx").focus();return}
-    if(dr.photos.some(p=>p.status==="up")){toast("Đợi ảnh tải lên xong");return}
-    if(!dr.photos.some(p=>p.status==="ok")&&!card.classList.contains("wait")&&!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Gửi không kèm ảnh?";toast("Nên kèm ảnh sau khi sửa để người kiểm xác nhận nhanh. Bấm lần nữa để gửi không ảnh.");return}
-    const person=DEPT.name||"";
+    if(!dr.text.trim()){toast("Vui lòng nhập nội dung khắc phục.");card.querySelector(".fx").focus();return}
+    if(dr.photos.some(p=>p.status==="up")){toast("Vui lòng chờ ảnh tải xong.");return}
+    if(!dr.photos.some(p=>p.status==="ok")&&!card.classList.contains("wait")&&!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Gửi không ảnh?";toast("Nên kèm ảnh sau sửa. Bấm lần nữa để gửi không ảnh.");return}
+    const person=DEPT.name||"",unit=DEPT.manager?ACC.name:DEPT.bp;
     b.disabled=true;b.textContent="Đang gửi…";
     try{const i=KP.issues.find(x=>String(x.row)===row);const photos=dr.photos.filter(p=>p.status==="ok").map(p=>p.url).concat(dr.photos.some(p=>p.status==="ok")?[]:i.fixPhotos);
-      KP=await run("submitFix",DEPT.bp,DEPT.pin,+row,card.dataset.id,card.dataset.rep,dr.text,photos,person?person+" ("+DEPT.bp+")":DEPT.bp);
-      delete FIXDRAFT[row];renderDept();toast("Đã gửi, chờ người kiểm xác nhận")}
+      KP=await run("submitFix",DEPT.bp,DEPT.pin,+row,card.dataset.id,card.dataset.rep,dr.text,photos,person?person+" ("+unit+")":unit);
+      delete FIXDRAFT[row];renderDept();toast("Đã gửi, chờ xác nhận.")}
     catch(err){toast(errText(err));loadDept()}
   }
 });
@@ -739,11 +761,11 @@ const TC_KIND={display:"Áp dụng cho từng xe trưng bày",test:"Áp dụng c
 async function loadStandards(){
   if(STD){renderStandards();return}
   try{STD=await run("getStandards");
-    $("tc-eyebrow").textContent=`Bộ tiêu chuẩn KSCL · ${STD.showroom||""}${STD.model?" · "+STD.model:""}`;
+    $("tc-eyebrow").textContent=`Bộ tiêu chuẩn KSCL${STD.model?" · "+STD.model:""}`;
     const owners=[...new Set(STD.checkpoints.flatMap(cp=>cp.criteria.map(c=>c.owner)))].sort();
-    $("tc-owner").innerHTML=`<option value="">Mọi bộ phận</option>`+owners.map(o=>`<option>${esc(o)}</option>`).join("");
+    $("tc-owner").innerHTML=`<option value="">Tất cả</option>`+owners.map(o=>`<option>${esc(o)}</option>`).join("");
     renderStandards()}
-  catch(e){$("tc-list").innerHTML=`<div class="empty">Không tải được: ${esc(errText(e))}</div>`}
+  catch(e){$("tc-list").innerHTML=`<div class="empty">Chưa tải được. ${esc(errText(e))}</div>`}
 }
 const fold=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();
 function renderStandards(){
@@ -760,14 +782,14 @@ function renderStandards(){
       nCp++;nCr+=crit.length;
       return `<div class="card" data-cp="${esc(cp.id)}">
         <div class="card-top"><div><h3>${esc(cp.name)}</h3>${TC_KIND[cp.kind]?`<div class="sub">${TC_KIND[cp.kind]}</div>`:""}</div><span class="chip na">${crit.length} tiêu chí</span></div>
-        ${(cp.samples||[]).length?`<div class="samples"><div class="eyebrow">Mẫu chuẩn VinFast · bấm để xem lớn</div><div class="row">${cp.samples.map((x,k)=>`<button data-tsample="${k}" aria-label="Xem ảnh mẫu: ${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,300)}" alt="${esc(x.caption)}"><span class="cap">${esc(x.caption)}</span></button>`).join("")}</div></div>`:""}
+        ${(cp.samples||[]).length?`<div class="samples"><div class="eyebrow">Mẫu chuẩn VinFast</div><div class="row">${cp.samples.map((x,k)=>`<button data-tsample="${k}" aria-label="Xem ảnh mẫu: ${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,300)}" alt="${esc(x.caption)}"><span class="cap">${esc(x.caption)}</span></button>`).join("")}</div></div>`:""}
         <ul class="crit">${crit.map(c=>`<li class="cr" style="grid-template-columns:1fr"><div class="t">${esc(c.text)}<div class="tags"><span class="tag">${FREQ[c.freq]||c.freq}</span><span class="tag">${esc(c.owner)}</span>${c.ref?`<span class="tag">${esc(c.ref)}</span>`:""}</div></div></li>`).join("")}</ul>
-        ${cp.guide?`<div class="guide">Cách chụp khi kiểm: ${esc(cp.guide)}</div>`:""}
+        ${cp.guide?`<div class="guide">Cách chụp: ${esc(cp.guide)}</div>`:""}
       </div>`}).join("");
     return cards?`<section class="grp"><div class="grp-h"><h2><span class="code">${g}</span>${esc(name)}</h2></div>${cards}</section>`:"";
   }).join("");
-  $("tc-count").textContent=`${nCr} tiêu chí ở ${nCp} khu vực`+(STD.thresholds?` · Đạt khi tỷ lệ từ ${STD.thresholds.pass}%`:"");
-  $("tc-list").innerHTML=html||`<div class="empty">Không có tiêu chí nào khớp. Thử từ khóa khác hoặc bỏ bớt bộ lọc.</div>`;
+  $("tc-count").textContent=`${nCr} tiêu chí · ${nCp} khu vực`+(STD.thresholds?` · đạt từ ${STD.thresholds.pass}%`:"");
+  $("tc-list").innerHTML=html||`<div class="empty">Không có tiêu chí phù hợp.</div>`;
 }
 $("tc-q").addEventListener("input",()=>{clearTimeout(window.__tcT);window.__tcT=setTimeout(renderStandards,150)});
 ["tc-freq","tc-owner"].forEach(id=>$(id).addEventListener("change",renderStandards));
@@ -781,14 +803,16 @@ function boot(){
   const bm=document.getElementById("boot-msg");if(bm)bm.hidden=true;
   applyAcc();
   // mặc định mở màn hình Đăng nhập; link có ?trang=... thì mở thẳng trang đó (nếu được phép)
-  show(BOOT.view&&(ACC?ROLE_VIEWS[ACC.role]:GUEST_VIEWS).includes(BOOT.view)?BOOT.view:"login");
+  if(BOOT.view&&ACC&&viewsOf(ACC).includes(BOOT.view))show(BOOT.view);
+  else if(BOOT.view&&!ACC&&VIEW_NAME[BOOT.view])show(BOOT.view); // chưa đăng nhập: show() chuyển sang Đăng nhập, nhớ trang cần mở
+  else show(GUEST_VIEWS.includes(BOOT.view)?BOOT.view:"login");
   if(view!=="bao-cao")refreshCount();
 }
 // đọc ?trang=...&bp=... của link web app
 try{const p=new URLSearchParams(location.search);BOOT.view=String(p.get("trang")||"");BOOT.bp=String(p.get("bp")||"");boot()}
 catch(e){boot()}
 setTimeout(boot,2500); // phòng khi không đọc được tham số link
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&view==="bao-cao")loadStatus(true)});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&view==="bao-cao"&&canReport())loadStatus(true)});
 })();
 </script>
 </body>
