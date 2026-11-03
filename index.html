@@ -151,6 +151,8 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 @media (max-width:520px){.cr{grid-template-columns:1fr}}
 .cr .t{font-size:.92rem;min-width:0}
 .cr input.note{margin-top:8px;font-size:.88rem;border-color:var(--bad);background:var(--bad-soft)}
+.cr input.note.skip{border-color:var(--line);background:var(--paper-2)}
+.fxmode{display:flex;flex-wrap:wrap;gap:6px}.fxmode button{font:inherit;font-size:.84rem;font-weight:700;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}.fxmode button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .seg{display:grid;grid-template-columns:repeat(3,minmax(64px,1fr));gap:6px;height:max-content}
 .seg button{font:inherit;font-size:.8rem;font-weight:700;padding:0 8px;min-height:42px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;border-radius:999px}
 .seg button[data-v="y"]::before{content:"✓ "} .seg button[data-v="n"]::before{content:"✕ "}
@@ -344,13 +346,13 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
     <div class="filters">
       <label class="f">Phần<select id="f-group"><option value="">Tất cả</option></select></label>
       <label class="f">Bộ phận<select id="f-owner"><option value="">Tất cả</option></select></label>
-      <label class="f">Trạng thái<select id="f-status"><option value="">Tất cả</option><option>Chưa xử lý</option><option>Chờ bộ phận thực hiện</option><option>Chờ xác nhận</option></select></label>
+      <label class="f">Trạng thái<select id="f-status"><option value="">Tất cả</option><option>Chưa xử lý</option><option>Đang khắc phục</option><option>Chờ bộ phận thực hiện</option><option>Chờ xác nhận</option></select></label>
     </div>
     <div class="actions"><button class="btn" id="bc-pdf">Xuất PDF báo cáo</button><span class="small" id="bc-pdf-st"></span></div>
     <div id="bc-list" style="display:flex;flex-direction:column;gap:22px"><div class="empty">Đang tải…</div></div>
     <section class="grp">
       <div class="grp-h"><h2>Các lần kiểm gần đây</h2></div>
-      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Nhóm trực</th><th>Người kiểm</th><th class="r">Tỷ lệ đạt</th><th class="r">Đạt / Không</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
+      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Nhóm trực</th><th>Người kiểm</th><th class="r">Tỷ lệ đạt</th><th class="r">Đạt / Không / Bỏ qua</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
     </section>
   </main>
 
@@ -425,8 +427,12 @@ const FREQ_LONG={day:"hằng ngày",week:"hằng tuần",month:"hằng tháng"};
 // Kỳ tháng là bản chi tiết: gồm mọi tiêu chí (cả mục Quý)
 const INCL={day:["day"],week:["day","week"],month:["day","week","month","quarter"]};
 const ST={dat:"Đạt",can:"Cần cải thiện",khong:"Không đạt",na:"Chưa chấm"};
-const OPEN="Chưa xử lý",WAIT="Chờ xác nhận",TODO="Chờ bộ phận thực hiện";
-const stCls=s=>s===WAIT?"wait":s===TODO?"todo":"open";
+const OPEN="Chưa xử lý",WAIT="Chờ xác nhận",TODO="Chờ bộ phận thực hiện",DOING="Đang khắc phục";
+const stCls=s=>s===WAIT||s===DOING?"wait":s===TODO?"todo":"open";
+const pending=s=>s===OPEN||s===TODO||s===DOING;
+const hanOf=i=>i.status===DOING&&i.eta?i.eta:i.due;
+const isLate=(i,today)=>pending(i.status)&&hanOf(i)<today;
+const isSkip=i=>i.kind?i.kind==="Bỏ qua":!i.note;
 let CR=null,period="day";
 let tt;function toast(m){let el=document.querySelector(".toast");if(!el){el=document.createElement("div");el.className="toast";el.setAttribute("role","status");document.body.appendChild(el)}el.textContent=m;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,3200)}
 const pctTxt=p=>p==null||isNaN(p)?"–":Math.round(p*100)+"%";
@@ -596,7 +602,7 @@ function crHTML(ins,c){
   const sw=ins.car&&/phần mềm/i.test(c.text)&&ins.car.expected?` <span class="muted">(bản chuẩn: <span class="num">${esc(ins.car.expected)}</span>)</span>`:"";
   return `<li class="cr" data-cid="${esc(c.id)}"><div class="t">${esc(c.text)}${sw}
     <div class="tags"><span class="tag">${FREQ[c.freq]}</span><span class="tag">${esc(ownerTag(c.owner))}</span>${c.ref?`<span class="tag">${esc(c.ref)}</span>`:""}</div>
-    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:""}</div>
+    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:met==="na"?`<input class="note skip" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú cho bộ phận (không bắt buộc)" aria-label="Ghi chú bỏ qua">`:""}</div>
     <div class="seg" role="group" aria-label="Kết quả">${[["y","Đạt"],["n","Không"],["x","Bỏ qua"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${pr(v)}">${l}</button>`).join("")}</div></li>`;
 }
 function cardHTML(ins){
@@ -631,10 +637,11 @@ function rerenderCard(key){
   if(grp){const a=score(instances().filter(i=>i.cp.group===ins.cp.group));grp.className="chip "+(a.p==null?"na":stOf(a.p));grp.textContent=pctTxt(a.p)}
   renderReport();
 }
+const iss0=()=>issuesNow();
 function issuesNow(){
   const date=$("m-date").value,out=[];
   for(const ins of instances()){const r=D.res[ins.key]||{};const ph=photosOf(ins.key).filter(p=>p.status==="ok").map(p=>p.url);
-    for(const c of ins.crit)if(r[c.id]?.met===false||r[c.id]?.met==="na")out.push({todo:r[c.id].met==="na",id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].met==="na"?"":(r[c.id].note||""),ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(ins.cp.samples||[])[0]?.id||""})}
+    for(const c of ins.crit)if(r[c.id]?.met===false||r[c.id]?.met==="na")out.push({todo:r[c.id].met==="na",id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(ins.cp.samples||[])[0]?.id||""})}
   return out;
 }
 const dueTxt=(iso,ref)=>iso===ref?"trong ngày":"trước "+vn(iso);
@@ -655,7 +662,8 @@ function renderReport(){
   const tone=p=>({dat:"ok",can:"warn",khong:"bad",na:""})[p==null?"na":stOf(p)];
   $("tally").innerHTML=`<div class="acc"><span class="lb2">Chung</span><b>${pctTxt(all.p)}</b><span class="sm2">${ST[all.p==null?"na":stOf(all.p)]}</span></div>`+
     Object.entries(CR.groups).map(([g,name])=>{const a=score(ins.filter(i=>i.cp.group===g));return `<div class="${tone(a.p)}" title="${esc(name)}"><span class="lb2">Phần ${g}</span><b>${pctTxt(a.p)}</b></div>`}).join("");
-  $("unresolved").innerHTML=all.u?`<span class="muted">Còn <b class="num">${all.u}</b> tiêu chí chưa chấm. Có thể lưu trước, lưu lại sau.</span>`:`<span style="color:var(--ok)">Đã chấm đủ ${all.y+all.n} tiêu chí.</span>`;
+  const nSkip=iss0().filter(i=>i.todo).length;
+  $("unresolved").innerHTML=`<b class="num" style="color:var(--ok)">${all.y}</b> đạt · <b class="num" style="color:var(--bad)">${all.n}</b> không đạt · <b class="num" style="color:var(--accent)">${nSkip}</b> bỏ qua<br>`+(all.u?`<span class="muted">Còn <b class="num">${all.u}</b> tiêu chí chưa chấm. Có thể lưu trước, lưu lại sau.</span>`:`<span style="color:var(--ok)">Đã chấm đủ tiêu chí.</span>`);
   const iss=issuesNow();
   $("issues").innerHTML=iss.length?byKey(iss,"owner").sort((a,b)=>b[1].length-a[1].length).map(([o,l])=>`<div class="owner"><div class="owner-h"><b>${esc(o)}</b><span class="chip khong">${l.length} mục</span></div><ol>${l.map(i=>`<li>${i.todo?`<span class="status todo">Tự kiểm tra</span> `:""}${esc(i.area)}: ${esc(i.text)}${i.note?` <span class="muted">— ${esc(i.note)}</span>`:""} <span class="due">${dueTxt(i.due,date)}</span></li>`).join("")}</ol><button class="btn ghost sm" data-copy-owner="${esc(o)}" style="align-self:flex-start">Sao chép tin nhắn</button></div>`).join("")
     :`<div class="empty">Chưa có hạng mục chưa đạt hoặc bỏ qua.</div>`;
@@ -695,7 +703,7 @@ $("v-kiem-tra").addEventListener("change",async e=>{
 function reportData(){
   const ins=instances(),all=score(ins);const groups={};
   for(const g of Object.keys(CR.groups)){const a=score(ins.filter(i=>i.cp.group===g));groups[g]={p:a.p}}
-  return{id:reportId(),date:$("m-date").value,period,inspector:$("m-inspector").value.trim(),overall:all.p,counts:{y:all.y,n:all.n,u:all.u+issuesNow().filter(i=>i.todo).length},groups,summary:$("sum").value.trim(),
+  return{id:reportId(),date:$("m-date").value,period,inspector:$("m-inspector").value.trim(),overall:all.p,counts:{y:all.y,n:all.n,u:all.u,s:issuesNow().filter(i=>i.todo).length},groups,summary:$("sum").value.trim(),
     items:ins.map(i=>{const r=D.res[i.key]||{};return{key:i.key,cpId:i.cp.id,title:i.title,sub:i.sub,group:i.cp.group,photos:photosOf(i.key).filter(p=>p.status==="ok").map(p=>p.url),
       crit:i.crit.filter(c=>r[c.id]&&r[c.id].met!=null).map(c=>({id:c.id,text:c.text,met:r[c.id].met,note:r[c.id].note||"",owner:ownerOf(c.owner),ref:c.ref}))}}).filter(i=>i.crit.length),
     issues:issuesNow(),nhom:D.nhom};
@@ -727,14 +735,14 @@ $("bc-reload").onclick=()=>loadStatus();
 function filters(){return{group:$("f-group").value,owner:$("f-owner").value,status:$("f-status").value}}
 function fillSelect(sel,values,label){const cur=sel.value;sel.innerHTML=`<option value="">${label}</option>`+values.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join("");if(values.some(([v])=>v===cur))sel.value=cur}
 function issueCard(i,mode){
-  const today=STATUS.today,late=(i.status===OPEN||i.status===TODO)&&i.due<today;
+  const today=STATUS.today,late=isLate(i,today);
   const adminCtl=mode==="report"&&canConfirm(i)?`<div class="actions"><input type="text" class="rv" placeholder="Ý kiến (bắt buộc khi trả lại)"><button class="btn sm" data-ok="${i.row}">Xác nhận đạt</button><button class="btn ghost sm" data-no="${i.row}">Trả lại</button></div>`:"";
   return `<div class="iss ${stCls(i.status)}" data-row="${i.row}" data-id="${esc(i.id)}" data-rep="${esc(i.report)}">
     <div class="top"><div style="min-width:0"><b>${esc(i.area)}</b><div style="font-size:.92rem">${esc(i.text)}</div></div><span class="status ${stCls(i.status)}">${esc(i.status)}</span></div>
-    <div class="meta2"><span>${esc(i.owner)}</span><span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${late?" · quá hạn":""}</span></div>
-    ${i.note?`<div class="small">Lỗi: ${esc(i.note)}</div>`:""}
+    <div class="meta2"><span>${esc(i.owner)}</span><span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${i.status===DOING&&i.eta?" · dự kiến xong "+vn(i.eta):""}${late?" · quá hạn":""}</span></div>
+    ${i.note?`<div class="small">${isSkip(i)?"Ghi chú":"Lỗi"}: ${esc(i.note)}</div>`:""}
     ${i.review&&i.status===OPEN?`<div class="rev">Lý do trả lại: ${esc(i.review)}</div>`:""}
-    ${i.fix?`<div class="fix"><b>Khắc phục:</b> ${esc(i.fix)} <span class="muted small">— ${esc(i.fixBy)}, ${esc(i.fixAt)}</span></div>`:""}
+    ${i.fix?`<div class="fix"><b>${i.status===DOING?"Đang khắc phục":"Khắc phục"}:</b> ${esc(i.fix)} <span class="muted small">— ${esc(i.fixBy)}, ${esc(i.fixAt)}</span></div>`:""}
     ${trioHTML(i,mode)}
     ${adminCtl}
   </div>`;
@@ -746,16 +754,15 @@ function renderStatus(){
   fillSelect($("f-group"),Object.entries(s.groups).map(([g,n])=>[g,g+". "+n]),"Tất cả");
   fillSelect($("f-owner"),[...new Set(s.issues.map(i=>i.owner))].sort().map(o=>[o,o]),"Tất cả");
   const f=filters(),list=s.issues.filter(i=>(!f.group||i.group===f.group)&&(!f.owner||i.owner===f.owner)&&(!f.status||i.status===f.status));
-  const late=list.filter(i=>(i.status===OPEN||i.status===TODO)&&i.due<today).length,wait=list.filter(i=>i.status===WAIT).length,todo=list.filter(i=>i.status===TODO).length,open=list.filter(i=>i.status===OPEN).length;
+  const late=list.filter(i=>isLate(i,today)).length,wait=list.filter(i=>i.status===WAIT).length,todo=list.filter(i=>i.status===TODO).length,open=list.filter(i=>i.status===OPEN).length,doing=list.filter(i=>i.status===DOING).length;
   const tone=p=>({dat:"ok",can:"warn",khong:"bad",na:""})[stOf(p)];
   $("bc-kpi").style.setProperty("--n",5);
-  $("bc-kpi").innerHTML=`<div class="bad"><span class="lb2">Chưa đạt</span><b>${open}</b></div><div class="acc"><span class="lb2">Chờ bộ phận làm</span><b>${todo}</b></div><div class="bad"><span class="lb2">Quá hạn</span><b>${late}</b></div><div class="warn"><span class="lb2">Chờ xác nhận</span><b>${wait}</b></div>`+
-    `<div class="${last?tone(last.overall):""}"><span class="lb2">Lần kiểm gần nhất</span><b>${last?pctTxt(last.overall):"–"}</b><span class="sm2">${last?vn(last.date)+" · "+esc(last.period):"Chưa có"}</span></div>`;
+  $("bc-kpi").innerHTML=`<div class="bad"><span class="lb2">Chưa xử lý</span><b>${open}</b></div><div class="warn"><span class="lb2">Đang khắc phục</span><b>${doing}</b></div><div class="acc"><span class="lb2">Chờ bộ phận làm</span><b>${todo}</b></div><div class="warn"><span class="lb2">Chờ xác nhận</span><b>${wait}</b></div><div class="bad"><span class="lb2">Quá hạn</span><b>${late}</b></div>`;
   $("bc-groups").innerHTML=`<div class="acc"><span class="lb2">Tỷ lệ đạt</span><b style="font-size:1.1rem">${last?vn(last.date):"–"}</b></div>`+Object.entries(s.groups).map(([g,n])=>{const x=last?last.groups[g]:null,c=s.issues.filter(i=>i.group===g).length;return `<div class="${tone(x)}" title="${esc(n)}"><span class="lb2">Phần ${g}</span><b>${pctTxt(x)}</b><span class="sm2">${c} lỗi mở</span></div>`}).join("");
   $("bc-list").innerHTML=list.length?Object.entries(s.groups).map(([g,n])=>{const gl=list.filter(i=>i.group===g).sort((a,b)=>a.due<b.due?-1:1);if(!gl.length)return"";
     return `<section class="grp"><div class="grp-h"><h2><span class="code">${g}</span>${esc(n)}</h2><span class="chip khong">${gl.length} mục</span></div>${gl.map(i=>issueCard(i,"report")).join("")}</section>`}).join("")
     :`<div class="empty">${s.issues.length?"Không có mục phù hợp bộ lọc.":"Không còn hạng mục chưa đạt."}</div>`;
-  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.nhom||"—")}</td><td>${esc(r.inspector)}</td><td class="r"><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num r">${r.y} / ${r.n}</td></tr>`).join(""):`<tr><td colspan="6" class="muted">Chưa có lần kiểm.</td></tr>`;
+  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.nhom||"—")}</td><td>${esc(r.inspector)}</td><td class="r"><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num r">${r.y} / ${r.n} / ${r.s||0}</td></tr>`).join(""):`<tr><td colspan="6" class="muted">Chưa có lần kiểm.</td></tr>`;
 }
 $("v-bao-cao").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;
@@ -788,30 +795,32 @@ function renderDept(){
   if(!KP)return;const today=KP.today;
   if(DEPT.manager){const os=[...new Set(KP.issues.map(i=>i.owner))].sort();fillSelect($("kp-owner"),os.map(o=>[o,o]),"Tất cả");if(!os.includes(kpOwner))kpOwner="";$("kp-owner").value=kpOwner}
   const all=KP.issues.filter(i=>!kpOwner||i.owner===kpOwner);
-  const open=all.filter(i=>i.status===OPEN).length,todo=all.filter(i=>i.status===TODO).length,wait=all.length-open-todo;
-  $("kp-count").textContent=(DEPT.name?DEPT.name+" · ":"")+(all.length?`${open} cần khắc phục · ${todo} cần tự kiểm tra · ${wait} chờ xác nhận`:"không còn việc cần khắc phục");
+  const open=all.filter(i=>i.status===OPEN).length,todo=all.filter(i=>i.status===TODO).length,doing=all.filter(i=>i.status===DOING).length,wait=all.length-open-todo-doing;
+  $("kp-count").textContent=(DEPT.name?DEPT.name+" · ":"")+(all.length?`${open} cần khắc phục · ${doing} đang khắc phục · ${todo} cần tự kiểm tra · ${wait} chờ xác nhận`:"không còn việc cần khắc phục");
   const groups=Object.entries(KP.groups).filter(([g])=>all.some(i=>i.group===g));
   $("kp-groups").innerHTML=[["","Tất cả ("+all.length+")"],...groups.map(([g,n])=>[g,`${g}. ${n} (${all.filter(i=>i.group===g).length})`])].map(([g,l])=>`<button data-g="${g}" aria-pressed="${g===kpGroup}">${esc(l)}</button>`).join("");
   const inG=all.filter(i=>!kpGroup||i.group===kpGroup);
   const areas=[...new Set(inG.map(i=>i.cpName||i.area))].sort();
   fillSelect($("kp-area"),areas.map(a=>[a,a]),"Tất cả");
   const a=$("kp-area").value,list=inG.filter(i=>!a||(i.cpName||i.area)===a).sort((x,y)=>(x.status===y.status?0:x.status===WAIT?1:y.status===WAIT?-1:0)||(x.due<y.due?-1:1));
-  $("kp-list").innerHTML=list.length?list.map(i=>{const late=(i.status===OPEN||i.status===TODO)&&i.due<today,tk=i.status===TODO||(i.status===WAIT&&!i.note),dr=FIXDRAFT[i.row]||(FIXDRAFT[i.row]={text:i.fix||"",photos:[]});
+  $("kp-list").innerHTML=list.length?list.map(i=>{const late=isLate(i,today),tk=isSkip(i),dr=FIXDRAFT[i.row]||(FIXDRAFT[i.row]={text:i.fix||"",photos:[],mode:i.status===DOING?"doing":"done",eta:i.eta||""});
     return `<div class="iss ${stCls(i.status)}" data-row="${i.row}" data-id="${esc(i.id)}" data-rep="${esc(i.report)}">
       <div class="top"><div style="min-width:0"><span class="eyebrow">${i.group}${i.cpName?" · "+esc(i.cpName):""}</span><br><b>${esc(i.area)}</b><div style="font-size:.92rem">${esc(i.text)}</div></div><span class="status ${stCls(i.status)}">${esc(i.status)}</span></div>
       ${tk?`<div class="banner info small">Tổ kiểm tra chưa chấm mục này. Nhờ bộ phận tự kiểm tra, ghi kết quả và chụp ảnh.</div>`:""}
-      <div class="meta2">${DEPT.manager?`<span>${esc(i.owner)}</span>`:""}<span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${late?" · quá hạn":""}</span></div>
-      ${i.note?`<div class="small">Lỗi: ${esc(i.note)}</div>`:""}
+      <div class="meta2">${DEPT.manager?`<span>${esc(i.owner)}</span>`:""}<span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${i.status===DOING&&i.eta?" · dự kiến xong "+vn(i.eta):""}${late?" · quá hạn":""}</span></div>
+      ${i.note?`<div class="small">${tk?"Ghi chú":"Lỗi"}: ${esc(i.note)}</div>`:""}
       ${i.review&&i.status===OPEN?`<div class="rev">Người kiểm trả lại: ${esc(i.review)}</div>`:""}
       ${trioHTML(i,"dept")}
-      <label class="f"><span>${tk?"Kết quả kiểm tra":"Nội dung khắc phục"} <span class="req">*</span></span><textarea class="fx" rows="2" placeholder="${tk?"Đã kiểm: đạt, đủ hồ sơ / đã bổ sung…":"Đã lau kính, thay 2 bóng đèn trần"}">${esc(dr.text)}</textarea></label>
+      <div class="fxmode" role="group" aria-label="Tình trạng"><button data-mode="done" aria-pressed="${dr.mode!=="doing"}">${tk?"Đã kiểm tra xong":"Đã khắc phục"}</button><button data-mode="doing" aria-pressed="${dr.mode==="doing"}">${tk?"Cần thêm thời gian":"Đang khắc phục · cần thời gian"}</button></div>
+      ${dr.mode==="doing"?`<label class="f"><span>Dự kiến hoàn thành <span class="req">*</span></span><input type="date" class="fxeta" value="${esc(dr.eta)}" min="${today}"></label>`:""}
+      <label class="f"><span>${dr.mode==="doing"?"Việc đang làm":tk?"Kết quả kiểm tra":"Nội dung khắc phục"} <span class="req">*</span></span><textarea class="fx" rows="2" placeholder="${dr.mode==="doing"?"Việc đang làm và lý do cần thêm thời gian":tk?"Kết quả tự kiểm tra":"Mô tả ngắn việc đã khắc phục"}">${esc(dr.text)}</textarea></label>
       <div class="photos">${dr.photos.map((p,k)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh khắc phục ${k+1}">`:""}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi"}</span>`:""}<button data-fdel="${k}" aria-label="Xóa ảnh">×</button></div>`).join("")}
-        <label class="pick"><span class="plus">+</span>Ảnh sau sửa<input type="file" accept="image/*" multiple class="fxfile"></label></div>
-      <div class="actions"><button class="btn" data-send>${i.status===WAIT?(tk?"Cập nhật kết quả":"Cập nhật khắc phục"):(tk?"Gửi kết quả kiểm tra":"Báo đã khắc phục")}</button>${i.status===WAIT?`<span class="small muted">Đã gửi ${esc(i.fixAt)} · chờ xác nhận</span>`:""}</div>
+        <label class="pick"><span class="plus">+</span>Thêm ảnh<input type="file" accept="image/*" multiple class="fxfile"></label></div>
+      <div class="actions"><button class="btn" data-send>${dr.mode==="doing"?(i.status===DOING?"Cập nhật tiến độ":"Báo đang khắc phục"):i.status===WAIT?(tk?"Cập nhật kết quả":"Cập nhật khắc phục"):(tk?"Gửi kết quả kiểm tra":"Báo đã khắc phục")}</button>${i.status===WAIT?`<span class="small muted">Đã gửi ${esc(i.fixAt)} · chờ xác nhận</span>`:""}</div>
     </div>`}).join("")
     :`<div class="empty">${all.length?"Không có mục ở vị trí này.":"Không còn hạng mục cần khắc phục."}</div>`;
 }
-$("kp-list").addEventListener("input",e=>{if(!e.target.classList.contains("fx"))return;const row=e.target.closest(".iss").dataset.row;(FIXDRAFT[row]||(FIXDRAFT[row]={text:"",photos:[]})).text=e.target.value});
+$("kp-list").addEventListener("input",e=>{const t=e.target;if(!t.classList.contains("fx")&&!t.classList.contains("fxeta"))return;const row=t.closest(".iss").dataset.row,dr=FIXDRAFT[row]||(FIXDRAFT[row]={text:"",photos:[]});if(t.classList.contains("fx"))dr.text=t.value;else dr.eta=t.value});
 $("kp-list").addEventListener("change",async e=>{
   const t=e.target;if(!t.classList.contains("fxfile"))return;
   const card=t.closest(".iss"),row=card.dataset.row,i=KP.issues.find(x=>String(x.row)===row),dr=FIXDRAFT[row];
@@ -825,15 +834,18 @@ $("kp-list").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;const card=b.closest(".iss");if(!card)return;const row=card.dataset.row,dr=FIXDRAFT[row];
   if(b.dataset.trio!==undefined){const i=KP.issues.find(x=>String(x.row)===row);lbOpen(trioList(i),+b.dataset.trio);return}
   if(b.dataset.fdel!==undefined){dr.photos.splice(+b.dataset.fdel,1);renderDept();return}
+  if(b.dataset.mode){dr.mode=b.dataset.mode;renderDept();return}
   if(b.hasAttribute("data-send")){
-    if(!dr.text.trim()){toast("Vui lòng nhập nội dung khắc phục.");card.querySelector(".fx").focus();return}
+    const doing=dr.mode==="doing";
+    if(doing&&!dr.eta){toast("Vui lòng chọn ngày dự kiến hoàn thành.");card.querySelector(".fxeta")?.focus();return}
+    if(!dr.text.trim()){toast(doing?"Vui lòng ghi việc đang làm.":"Vui lòng nhập nội dung khắc phục.");card.querySelector(".fx").focus();return}
     if(dr.photos.some(p=>p.status==="up")){toast("Vui lòng chờ ảnh tải xong.");return}
-    if(!dr.photos.some(p=>p.status==="ok")&&!card.classList.contains("wait")&&!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Gửi không ảnh?";toast("Nên kèm ảnh sau sửa. Bấm lần nữa để gửi không ảnh.");return}
+    if(!doing&&!dr.photos.some(p=>p.status==="ok")&&!card.classList.contains("wait")&&!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Gửi không ảnh?";toast("Nên kèm ảnh sau sửa. Bấm lần nữa để gửi không ảnh.");return}
     const person=DEPT.name||"",unit=DEPT.manager?ACC.name:DEPT.bp;
     b.disabled=true;b.textContent="Đang gửi…";
     try{const i=KP.issues.find(x=>String(x.row)===row);const photos=dr.photos.filter(p=>p.status==="ok").map(p=>p.url).concat(dr.photos.some(p=>p.status==="ok")?[]:i.fixPhotos);
-      KP=await run("submitFix",DEPT.bp,DEPT.pin,+row,card.dataset.id,card.dataset.rep,dr.text,photos,person?person+" ("+unit+")":unit);
-      delete FIXDRAFT[row];renderDept();toast("Đã gửi, chờ xác nhận.")}
+      KP=await run("submitFix",DEPT.bp,DEPT.pin,+row,card.dataset.id,card.dataset.rep,dr.text,photos,person?person+" ("+unit+")":unit,doing?"doing":"done",doing?dr.eta:"");
+      delete FIXDRAFT[row];renderDept();toast(doing?"Đã ghi đang khắc phục, dự kiến xong "+vn(dr.eta)+".":"Đã gửi, chờ xác nhận.")}
     catch(err){toast(errText(err));loadDept()}
   }
 });
