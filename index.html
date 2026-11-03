@@ -127,6 +127,10 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .period{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px;width:100%;max-width:360px}
 .period button{flex:1;font:inherit;font-weight:700;font-size:.88rem;min-height:38px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:999px}
 .period button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.nhom{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;max-width:560px}
+.nhom button{font:inherit;font-weight:700;font-size:.86rem;min-height:40px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;cursor:pointer}
+.nhom button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.nhom-mem{font-size:.82rem;color:var(--muted);background:var(--paper-2);border-radius:10px;padding:7px 10px;max-width:560px}.nhom-mem b{color:var(--ink)}
 .sticky{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:10;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
 @media (min-width:760px){.sticky{top:calc(env(safe-area-inset-top,0px) + 118px)}}
 .sticky .row1{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -303,6 +307,11 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
           </div>
           <p class="muted small" id="period-note"></p>
         </div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="nhom-wrap" hidden>
+          <div class="eyebrow">Nhóm trực <span class="req">*</span></div>
+          <div class="nhom" id="nhom" role="group" aria-label="Nhóm trực"></div>
+          <p class="nhom-mem" id="nhom-mem">Chọn nhóm đang trực. Lỗi của Tổ trực sẽ giao cho nhóm này.</p>
+        </div>
         <div class="banner" id="warn" hidden></div>
       </header>
       <div class="sticky"><div class="row1"><span class="small" id="progress">Đang tải tiêu chí…</span><button class="btn sm" id="jump-report">Xem kết quả</button></div><div class="bar"><i id="progress-bar"></i></div></div>
@@ -340,7 +349,7 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
     <div id="bc-list" style="display:flex;flex-direction:column;gap:22px"><div class="empty">Đang tải…</div></div>
     <section class="grp">
       <div class="grp-h"><h2>Các lần kiểm gần đây</h2></div>
-      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Người kiểm</th><th class="r">Tỷ lệ đạt</th><th class="r">Đạt / Không</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
+      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Nhóm trực</th><th>Người kiểm</th><th class="r">Tỷ lệ đạt</th><th class="r">Đạt / Không</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
     </section>
   </main>
 
@@ -540,8 +549,8 @@ period=ls.get("kscl:period")||"day";if(!INCL[period])period="day";
 let D=null;
 const reportId=()=>$("m-date").value+"_"+period;
 const draftKey=()=>"kscl:draft:"+reportId();
-function loadDraft(){D=ls.get(draftKey())||{res:{},photos:{},sum:""};D.res=D.res||{};D.photos=D.photos||{};$("sum").value=D.sum||""}
-let saveT;function saveDraft(){clearTimeout(saveT);saveT=setTimeout(()=>{const copy={res:D.res,sum:D.sum,photos:{}};for(const k in D.photos)copy.photos[k]=D.photos[k].filter(p=>p.status==="ok").map(p=>({id:p.id,url:p.url,status:"ok"}));ls.set(draftKey(),copy)},300)}
+function loadDraft(){D=ls.get(draftKey())||{res:{},photos:{},sum:""};D.res=D.res||{};D.photos=D.photos||{};$("sum").value=D.sum||"";if(D.nhom==null)D.nhom=ls.get("kscl:nhom:"+$("m-date").value)||null}
+let saveT;function saveDraft(){clearTimeout(saveT);saveT=setTimeout(()=>{const copy={res:D.res,sum:D.sum,nhom:D.nhom,photos:{}};for(const k in D.photos)copy.photos[k]=D.photos[k].filter(p=>p.status==="ok").map(p=>({id:p.id,url:p.url,status:"ok"}));ls.set(draftKey(),copy)},300)}
 $("m-inspector").addEventListener("change",e=>ls.set("kscl:inspector",e.target.value.trim()));
 $("m-date").addEventListener("change",()=>{loadDraft();renderStaff()});
 $("sum").addEventListener("input",e=>{D.sum=e.target.value;saveDraft()});
@@ -554,6 +563,18 @@ function loadConfig(){
     renderStaff();
   }).catch(e=>{if(authErr(errText(e)))return adminErr(e);$("groups").innerHTML=`<div class="empty">Chưa tải được tiêu chí. ${esc(errText(e))}</div>`;$("progress").textContent=""});
 }
+/* Tổ trực chia nhóm: tiêu chí "Tổ trực" giao cho nhóm đang trực */
+const hasNhom=()=>!!(CR&&CR.dutyGroups&&CR.dutyGroups.length);
+const nhomObj=()=>hasNhom()&&D&&D.nhom?CR.dutyGroups.find(g=>g.n===D.nhom)||null:null;
+const ownerOf=o=>{const g=nhomObj();return o==="Tổ trực"&&g?g.name:o};
+const ownerTag=o=>o!=="Tổ trực"||!hasNhom()?o:(nhomObj()?"Tổ trực · Nhóm "+D.nhom:"Tổ trực · chưa chọn nhóm");
+function renderNhom(){
+  $("nhom-wrap").hidden=!hasNhom();if(!hasNhom())return;
+  $("nhom").innerHTML=CR.dutyGroups.map(g=>`<button data-n="${g.n}" aria-pressed="${D.nhom===g.n}">Nhóm ${g.n}</button>`).join("");
+  const g=nhomObj();
+  $("nhom-mem").innerHTML=g?`<b>Nhóm ${g.n}</b>${g.members?" · "+esc(g.members):""}`:"Chọn nhóm đang trực. Lỗi của Tổ trực sẽ giao cho nhóm này.";
+}
+$("nhom").addEventListener("click",e=>{const b=e.target.closest("button[data-n]");if(!b)return;D.nhom=Number(b.dataset.n);ls.set("kscl:nhom:"+$("m-date").value,D.nhom);saveDraft();renderStaff()});
 function instances(){
   if(!CR)return[];const out=[];
   for(const cp of CR.checkpoints){
@@ -572,7 +593,7 @@ function crHTML(ins,c){
   const pr=v=>(v==="y"&&met===true)||(v==="n"&&met===false)||(v==="x"&&met==="na");
   const sw=ins.car&&/phần mềm/i.test(c.text)&&ins.car.expected?` <span class="muted">(bản chuẩn: <span class="num">${esc(ins.car.expected)}</span>)</span>`:"";
   return `<li class="cr" data-cid="${esc(c.id)}"><div class="t">${esc(c.text)}${sw}
-    <div class="tags"><span class="tag">${FREQ[c.freq]}</span><span class="tag">${esc(c.owner)}</span>${c.ref?`<span class="tag">${esc(c.ref)}</span>`:""}</div>
+    <div class="tags"><span class="tag">${FREQ[c.freq]}</span><span class="tag">${esc(ownerTag(c.owner))}</span>${c.ref?`<span class="tag">${esc(c.ref)}</span>`:""}</div>
     ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:""}</div>
     <div class="seg" role="group" aria-label="Kết quả">${[["y","Đạt"],["n","Không"],["x","Bỏ qua"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${pr(v)}">${l}</button>`).join("")}</div></li>`;
 }
@@ -589,6 +610,7 @@ function cardHTML(ins){
   </div>`;
 }
 function renderStaff(){
+  if(CR)renderNhom();
   $("period").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===period)));
   if(!CR)return;
   const ins=instances();
@@ -610,7 +632,7 @@ function rerenderCard(key){
 function issuesNow(){
   const date=$("m-date").value,out=[];
   for(const ins of instances()){const r=D.res[ins.key]||{};const ph=photosOf(ins.key).filter(p=>p.status==="ok").map(p=>p.url);
-    for(const c of ins.crit)if(r[c.id]?.met===false)out.push({id:ins.key+"|"+c.id,owner:c.owner,area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(ins.cp.samples||[])[0]?.id||""})}
+    for(const c of ins.crit)if(r[c.id]?.met===false)out.push({id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(ins.cp.samples||[])[0]?.id||""})}
   return out;
 }
 const dueTxt=(iso,ref)=>iso===ref?"trong ngày":"trước "+vn(iso);
@@ -671,11 +693,12 @@ function reportData(){
   for(const g of Object.keys(CR.groups)){const a=score(ins.filter(i=>i.cp.group===g));groups[g]={p:a.p}}
   return{id:reportId(),date:$("m-date").value,period,inspector:$("m-inspector").value.trim(),overall:all.p,counts:{y:all.y,n:all.n,u:all.u},groups,summary:$("sum").value.trim(),
     items:ins.map(i=>{const r=D.res[i.key]||{};return{key:i.key,cpId:i.cp.id,title:i.title,sub:i.sub,group:i.cp.group,photos:photosOf(i.key).filter(p=>p.status==="ok").map(p=>p.url),
-      crit:i.crit.filter(c=>r[c.id]&&r[c.id].met!=null).map(c=>({id:c.id,text:c.text,met:r[c.id].met,note:r[c.id].note||"",owner:c.owner,ref:c.ref}))}}).filter(i=>i.crit.length),
-    issues:issuesNow()};
+      crit:i.crit.filter(c=>r[c.id]&&r[c.id].met!=null).map(c=>({id:c.id,text:c.text,met:r[c.id].met,note:r[c.id].note||"",owner:ownerOf(c.owner),ref:c.ref}))}}).filter(i=>i.crit.length),
+    issues:issuesNow(),nhom:D.nhom};
 }
 $("save-rep").onclick=async()=>{
   const d=reportData();if(!d.inspector){toast("Vui lòng nhập người kiểm tra.");$("m-inspector").focus();window.scrollTo(0,0);return}
+  if(hasNhom()&&!nhomObj()){toast("Vui lòng chọn nhóm trực.");$("nhom-wrap").scrollIntoView({behavior:"smooth",block:"center"});return}
   if(d.issues.some(i=>!i.note)){toast("Vui lòng ghi chú cho mục Không đạt.");document.querySelector("input.note:placeholder-shown")?.focus();return}
   if(Object.values(D.photos).some(l=>l.some(p=>p.status==="up"))){toast("Vui lòng chờ ảnh tải xong.");return}
   const b=$("save-rep");b.disabled=true;b.textContent="Đang lưu…";
@@ -727,7 +750,7 @@ function renderStatus(){
   $("bc-list").innerHTML=list.length?Object.entries(s.groups).map(([g,n])=>{const gl=list.filter(i=>i.group===g).sort((a,b)=>a.due<b.due?-1:1);if(!gl.length)return"";
     return `<section class="grp"><div class="grp-h"><h2><span class="code">${g}</span>${esc(n)}</h2><span class="chip khong">${gl.length} mục</span></div>${gl.map(i=>issueCard(i,"report")).join("")}</section>`}).join("")
     :`<div class="empty">${s.issues.length?"Không có mục phù hợp bộ lọc.":"Không còn hạng mục chưa đạt."}</div>`;
-  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.inspector)}</td><td class="r"><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num r">${r.y} / ${r.n}</td></tr>`).join(""):`<tr><td colspan="5" class="muted">Chưa có lần kiểm.</td></tr>`;
+  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.nhom||"—")}</td><td>${esc(r.inspector)}</td><td class="r"><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num r">${r.y} / ${r.n}</td></tr>`).join(""):`<tr><td colspan="6" class="muted">Chưa có lần kiểm.</td></tr>`;
 }
 $("v-bao-cao").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;
