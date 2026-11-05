@@ -153,7 +153,13 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .cr input.note{margin-top:8px;font-size:.88rem;border-color:var(--bad);background:var(--bad-soft)}
 .cr input.note.skip{border-color:var(--line);background:var(--paper-2)}
 .fxmode{display:flex;flex-wrap:wrap;gap:6px}.fxmode button{font:inherit;font-size:.84rem;font-weight:700;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}.fxmode button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.seg{display:grid;grid-template-columns:repeat(3,minmax(64px,1fr));gap:6px;height:max-content}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(64px,1fr));gap:6px;height:max-content}
+.card.carry{border-color:var(--warn);box-shadow:inset 0 4px 0 var(--warn),var(--shadow)}
+.prev{background:var(--paper-2);border-radius:10px;padding:8px 10px;font-size:.84rem;display:flex;flex-direction:column;gap:4px}
+.prev .imgs{display:flex;gap:6px;flex-wrap:wrap}.prev .imgs button{border:none;background:none;padding:0;cursor:pointer}.prev .imgs img{width:88px;aspect-ratio:4/3;object-fit:cover;border-radius:8px;display:block}
+.seg.fix button[data-f="1"][aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.seg.fix button[data-f="0"][aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--paper)}
+.carry-h{display:flex;align-items:center;gap:8px}.carry-h .code{background:var(--warn)!important;color:var(--paper)!important}
 .seg button{font:inherit;font-size:.8rem;font-weight:700;padding:0 8px;min-height:42px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;border-radius:999px}
 .seg button[data-v="y"]::before{content:"✓ "} .seg button[data-v="n"]::before{content:"✕ "}
 .seg button[data-v="y"][aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--paper)}
@@ -214,7 +220,7 @@ textarea#sum{min-height:80px}
 table.h{border-collapse:collapse;width:100%;font-size:.86rem;min-width:420px}
 table.h th,table.h td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
 table.h tr:last-child td{border-bottom:none}
-table.h th{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+table.h th{white-space:nowrap;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
 table.h .r{text-align:right}
 .lock{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:36px 20px;background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
 .lock svg{width:34px;height:34px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -343,6 +349,10 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
     </header>
     <div class="kpis wrap2" id="bc-kpi" style="--n:4"></div>
     <div class="kpis wrap3" id="bc-groups" style="--n:6"></div>
+    <p class="small muted" id="bc-note"></p>
+    <section class="grp"><div class="grp-h"><h2>Theo bộ phận phụ trách</h2></div>
+      <div class="tbl"><table class="h"><thead><tr><th>Bộ phận</th><th class="r">Tổng</th><th class="r">Đạt</th><th class="r">Không</th><th class="r">%</th></tr></thead><tbody id="bc-owners"></tbody></table></div></section>
+    <div class="grp-h" style="padding-top:4px"><h2>Hạng mục chưa đạt</h2></div>
     <div class="filters">
       <label class="f">Phần<select id="f-group"><option value="">Tất cả</option></select></label>
       <label class="f">Bộ phận<select id="f-owner"><option value="">Tất cả</option></select></label>
@@ -352,7 +362,7 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
     <div id="bc-list" style="display:flex;flex-direction:column;gap:22px"><div class="empty">Đang tải…</div></div>
     <section class="grp">
       <div class="grp-h"><h2>Các lần kiểm gần đây</h2></div>
-      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Nhóm trực</th><th>Người kiểm</th><th class="r">Tỷ lệ đạt</th><th class="r">Đạt / Không / Bỏ qua</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
+      <div class="tbl"><table class="h"><thead><tr><th>Ngày</th><th>Kỳ</th><th>Nhóm trực</th><th>Người kiểm</th><th class="r">Tỷ lệ đạt</th><th class="r">Đạt / Không</th></tr></thead><tbody id="bc-hist"></tbody></table></div>
     </section>
   </main>
 
@@ -365,7 +375,7 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
     <label class="f">Tìm tiêu chí<input type="text" id="tc-q" placeholder="pin, đèn, thảm, WC, POSM…" autocomplete="off"></label>
     <div class="chips" id="tc-groups"></div>
     <div class="filters">
-      <label class="f">Tần suất<select id="tc-freq"><option value="">Tất cả</option><option value="day">Ngày</option><option value="week">Tuần</option><option value="month">Tháng</option><option value="quarter">Quý</option></select></label>
+      <label class="f">Tần suất<select id="tc-freq"><option value="">Tất cả</option><option value="day">Ngày</option><option value="week">Tuần</option><option value="month">Tháng</option></select></label>
       <label class="f">Bộ phận<select id="tc-owner"><option value="">Tất cả</option></select></label>
     </div>
     <p class="small muted" id="tc-count"></p>
@@ -422,10 +432,12 @@ const run=(fn,...args)=>{
     .catch(e=>{const m=String(e&&e.message||e);throw new Error(/Failed to fetch|NetworkError|Load failed|network/i.test(m)?"Không kết nối được. Vui lòng kiểm tra mạng và thử lại.":m)});
 };
 const errText=e=>(e&&e.message?e.message:String(e||"Lỗi không xác định")).replace(/^Exception:\s*/,"");
-const FREQ={day:"Ngày",week:"Tuần",month:"Tháng",quarter:"Quý"};
+const FREQ={day:"Ngày",week:"Tuần",month:"Tháng"};
+// mục tồn: Không đạt ở kỳ lớn hiện ở phiếu kỳ nhỏ để chấm khắc phục
+const CARRY_TO={day:["week","month"],week:["month"],month:[]};
 const FREQ_LONG={day:"hằng ngày",week:"hằng tuần",month:"hằng tháng"};
-// Kỳ tháng là bản chi tiết: gồm mọi tiêu chí (cả mục Quý)
-const INCL={day:["day"],week:["day","week"],month:["day","week","month","quarter"]};
+// Kỳ tháng là bản chi tiết: gồm mọi tiêu chí
+const INCL={day:["day"],week:["day","week"],month:["day","week","month"]};
 const ST={dat:"Đạt",can:"Cần cải thiện",khong:"Không đạt",na:"Chưa chấm"};
 const OPEN="Chưa xử lý",WAIT="Chờ xác nhận",TODO="Chờ bộ phận thực hiện",DOING="Đang khắc phục";
 const stCls=s=>s===WAIT||s===DOING?"wait":s===TODO?"todo":"open";
@@ -557,8 +569,8 @@ period=ls.get("kscl:period")||"day";if(!INCL[period])period="day";
 let D=null;
 const reportId=()=>$("m-date").value+"_"+period;
 const draftKey=()=>"kscl:draft:"+reportId();
-function loadDraft(){D=ls.get(draftKey())||{res:{},photos:{},sum:""};D.res=D.res||{};D.photos=D.photos||{};$("sum").value=D.sum||"";if(D.nhom==null)D.nhom=ls.get("kscl:nhom:"+$("m-date").value)||null}
-let saveT;function saveDraft(){clearTimeout(saveT);saveT=setTimeout(()=>{const copy={res:D.res,sum:D.sum,nhom:D.nhom,photos:{}};for(const k in D.photos)copy.photos[k]=D.photos[k].filter(p=>p.status==="ok").map(p=>({id:p.id,url:p.url,status:"ok"}));ls.set(draftKey(),copy)},300)}
+function loadDraft(){D=ls.get(draftKey())||{res:{},photos:{},sum:""};D.res=D.res||{};D.photos=D.photos||{};D.carry=D.carry||{};$("sum").value=D.sum||"";if(D.nhom==null)D.nhom=ls.get("kscl:nhom:"+$("m-date").value)||null}
+let saveT;function saveDraft(){clearTimeout(saveT);saveT=setTimeout(()=>{const copy={res:D.res,sum:D.sum,nhom:D.nhom,carry:D.carry,photos:{}};for(const k in D.photos)copy.photos[k]=D.photos[k].filter(p=>p.status==="ok").map(p=>({id:p.id,url:p.url,status:"ok"}));ls.set(draftKey(),copy)},300)}
 $("m-inspector").addEventListener("change",e=>ls.set("kscl:inspector",e.target.value.trim()));
 $("m-date").addEventListener("change",()=>{loadDraft();renderStaff()});
 $("sum").addEventListener("input",e=>{D.sum=e.target.value;saveDraft()});
@@ -595,15 +607,24 @@ function instances(){
 }
 const resOf=key=>D.res[key]||(D.res[key]={});
 const photosOf=key=>D.photos[key]||(D.photos[key]=[]);
-function score(list){let y=0,n=0,u=0;for(const i of list){const r=D.res[i.key]||{};for(const c of i.crit){const m=r[c.id]?.met;if(m===true)y++;else if(m===false)n++;else if(m!=="na")u++}}return{y,n,u,p:(y+n)?y/(y+n):null}}
+function score(list){let y=0,n=0,u=0;for(const i of list){const r=D.res[i.key]||{};for(const c of i.crit){const m=r[c.id]?.met;if(m===true)y++;else if(m===false)n++;else u++}}return{y,n,u,p:(y+n)?y/(y+n):null}}
+/* mục tồn: lỗi còn mở của tiêu chí kỳ lớn hơn, phát hiện trước ngày kiểm này */
+function carryList(){if(!CR||!CR.open)return[];const date=$("m-date").value,rid=reportId();return CR.open.filter(i=>CARRY_TO[period].includes(i.freq)&&i.date<=date&&i.report!==rid).sort((a,b)=>a.group<b.group?-1:a.group>b.group?1:a.date<b.date?-1:1)}
+const carryPhotos=i=>[{id:i.samples?.[0]?.id||"",caption:"Mẫu chuẩn VinFast"},{id:fileId(i.photos?.[0]),caption:"Lúc kiểm "+vn(i.date)},{id:fileId(i.fixPhotos?.[0]),caption:"Bộ phận gửi sau khắc phục"}].filter(x=>x.id);
+function carryHTML(i){const v=D.carry[i.id],ph=carryPhotos(i);
+  return `<div class="card carry" data-carry="${esc(i.id)}"><div class="card-top"><div><h3>${esc(i.area)}</h3><div class="sub">${esc(i.owner)}</div></div><span class="chip can">Từ kỳ ${FREQ[i.period]||FREQ[i.freq]}</span></div>
+    <div class="t">${esc(i.text)}</div>
+    <div class="prev"><div><span class="chip khong">Không đạt · ${vn(i.date)}</span></div>${i.note?`<div>Lỗi: ${esc(i.note)}</div>`:""}${i.status===WAIT?`<div style="color:var(--warn);font-weight:600">Bộ phận báo đã khắc phục${i.fix?": "+esc(i.fix):""}</div>`:i.status===DOING?`<div style="color:var(--warn)">Bộ phận đang khắc phục${i.eta?", dự kiến xong "+vn(i.eta):""}</div>`:""}
+      ${ph.length?`<div class="imgs">${ph.map((x,k)=>`<button data-cph="${k}" aria-label="${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,240)}" alt="${esc(x.caption)}"></button>`).join("")}</div>`:""}</div>
+    <div class="seg fix" role="group" aria-label="Khắc phục"><button data-f="1" aria-pressed="${v===true}">Đã khắc phục</button><button data-f="0" aria-pressed="${v===false}">Chưa khắc phục</button></div></div>`}
 function crHTML(ins,c){
   const r=resOf(ins.key)[c.id],met=r?.met;
   const pr=v=>(v==="y"&&met===true)||(v==="n"&&met===false)||(v==="x"&&met==="na");
   const sw=ins.car&&/phần mềm/i.test(c.text)&&ins.car.expected?` <span class="muted">(bản chuẩn: <span class="num">${esc(ins.car.expected)}</span>)</span>`:"";
   return `<li class="cr" data-cid="${esc(c.id)}"><div class="t">${esc(c.text)}${sw}
     <div class="tags"><span class="tag">${FREQ[c.freq]}</span><span class="tag">${esc(ownerTag(c.owner))}</span>${c.ref?`<span class="tag">${esc(c.ref)}</span>`:""}</div>
-    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:met==="na"?`<input class="note skip" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú cho bộ phận (không bắt buộc)" aria-label="Ghi chú bỏ qua">`:""}</div>
-    <div class="seg" role="group" aria-label="Kết quả">${[["y","Đạt"],["n","Không"],["x","Bỏ qua"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${pr(v)}">${l}</button>`).join("")}</div></li>`;
+    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:""}</div>
+    <div class="seg" role="group" aria-label="Kết quả">${[["y","Đạt"],["n","Không đạt"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${pr(v)}">${l}</button>`).join("")}</div></li>`;
 }
 function cardHTML(ins){
   const sc=score([ins]),st=sc.p==null?"":stOf(sc.p),ph=photosOf(ins.key);
@@ -622,8 +643,9 @@ function renderStaff(){
   $("period").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===period)));
   if(!CR)return;
   const ins=instances();
-  $("period-note").textContent=`${ins.reduce((a,i)=>a+i.crit.length,0)} tiêu chí · ${ins.length} thẻ${period==="month"?" · toàn bộ tiêu chí":period==="week"?" · mục ngày và tuần":""}`;
-  $("groups").innerHTML=Object.entries(CR.groups).map(([g,name])=>{
+  const cl=carryList();
+  $("period-note").innerHTML=`${ins.reduce((a,i)=>a+i.crit.length,0)} tiêu chí · ${ins.length} thẻ${period==="month"?" · toàn bộ tiêu chí":period==="week"?" · mục ngày và tuần":""}${cl.length?` · <b style="color:var(--warn)">${cl.length} mục tồn cần chấm khắc phục</b>`:""}`;
+  $("groups").innerHTML=(cl.length?`<section class="grp" id="carry"><div class="grp-h"><h2 class="carry-h"><span class="code">!</span>Mục tồn từ kỳ trước</h2><span class="chip can">${cl.length} mục</span></div><p class="small muted">Giữ nguyên kết quả cũ. Chỉ chấm đã khắc phục hay chưa; không tính vào % của phiếu này.</p>${cl.map(carryHTML).join("")}</section>`:"")+Object.entries(CR.groups).map(([g,name])=>{
     const list=ins.filter(i=>i.cp.group===g);if(!list.length)return"";const a=score(list);
     return `<section class="grp" data-g="${g}"><div class="grp-h"><h2><span class="code">${g}</span>${esc(name)}</h2><span class="chip ${a.p==null?"na":stOf(a.p)}">${pctTxt(a.p)}</span></div>${list.map(cardHTML).join("")}</section>`;
   }).join("")||`<div class="empty">Kỳ này chưa có tiêu chí. Vui lòng kiểm tra cột "Đang dùng" và "Tần suất" trong Google Sheet.</div>`;
@@ -641,7 +663,7 @@ const iss0=()=>issuesNow();
 function issuesNow(){
   const date=$("m-date").value,out=[];
   for(const ins of instances()){const r=D.res[ins.key]||{};const ph=photosOf(ins.key).filter(p=>p.status==="ok").map(p=>p.url);
-    for(const c of ins.crit)if(r[c.id]?.met===false||r[c.id]?.met==="na")out.push({todo:r[c.id].met==="na",id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(ins.cp.samples||[])[0]?.id||""})}
+    for(const c of ins.crit)if(r[c.id]?.met===false)out.push({todo:false,id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(ins.cp.samples||[])[0]?.id||""})}
   return out;
 }
 const dueTxt=(iso,ref)=>iso===ref?"trong ngày":"trước "+vn(iso);
@@ -662,24 +684,28 @@ function renderReport(){
   const tone=p=>({dat:"ok",can:"warn",khong:"bad",na:""})[p==null?"na":stOf(p)];
   $("tally").innerHTML=`<div class="acc"><span class="lb2">Chung</span><b>${pctTxt(all.p)}</b><span class="sm2">${ST[all.p==null?"na":stOf(all.p)]}</span></div>`+
     Object.entries(CR.groups).map(([g,name])=>{const a=score(ins.filter(i=>i.cp.group===g));return `<div class="${tone(a.p)}" title="${esc(name)}"><span class="lb2">Phần ${g}</span><b>${pctTxt(a.p)}</b></div>`}).join("");
-  const nSkip=iss0().filter(i=>i.todo).length;
-  $("unresolved").innerHTML=`<b class="num" style="color:var(--ok)">${all.y}</b> đạt · <b class="num" style="color:var(--bad)">${all.n}</b> không đạt · <b class="num" style="color:var(--accent)">${nSkip}</b> bỏ qua<br>`+(all.u?`<span class="muted">Còn <b class="num">${all.u}</b> tiêu chí chưa chấm. Có thể lưu trước, lưu lại sau.</span>`:`<span style="color:var(--ok)">Đã chấm đủ tiêu chí.</span>`);
+  const cl=carryList(),cf=cl.filter(i=>D.carry[i.id]===true).length,cn=cl.filter(i=>D.carry[i.id]===false).length;
+  $("unresolved").innerHTML=`<b class="num" style="color:var(--ok)">${all.y}</b> đạt · <b class="num" style="color:var(--bad)">${all.n}</b> không đạt<br>`+(cl.length?`Mục tồn: <b class="num" style="color:var(--ok)">${cf}</b> đã khắc phục · <b class="num" style="color:var(--bad)">${cn}</b> chưa khắc phục${cl.length-cf-cn?` · <span class="muted">${cl.length-cf-cn} chưa chấm (giữ nguyên)</span>`:""}<br>`:"")+(all.u?`<span class="muted">Còn <b class="num">${all.u}</b> tiêu chí chưa chấm. Có thể lưu trước, lưu lại sau.</span>`:`<span style="color:var(--ok)">Đã chấm đủ tiêu chí.</span>`);
   const iss=issuesNow();
   $("issues").innerHTML=iss.length?byKey(iss,"owner").sort((a,b)=>b[1].length-a[1].length).map(([o,l])=>`<div class="owner"><div class="owner-h"><b>${esc(o)}</b><span class="chip khong">${l.length} mục</span></div><ol>${l.map(i=>`<li>${i.todo?`<span class="status todo">Tự kiểm tra</span> `:""}${esc(i.area)}: ${esc(i.text)}${i.note?` <span class="muted">— ${esc(i.note)}</span>`:""} <span class="due">${dueTxt(i.due,date)}</span></li>`).join("")}</ol><button class="btn ghost sm" data-copy-owner="${esc(o)}" style="align-self:flex-start">Sao chép tin nhắn</button></div>`).join("")
-    :`<div class="empty">Chưa có hạng mục chưa đạt hoặc bỏ qua.</div>`;
-  $("scale-note").textContent=`Tỷ lệ đạt = Đạt / (Đạt + Không). "Bỏ qua" không tính vào tỷ lệ, giao bộ phận phụ trách tự kiểm tra. Đạt từ ${CR.thresholds.pass}%, cần cải thiện từ ${CR.thresholds.warn}%. Nháp tự lưu trên máy này.`;
-  $("save-rep").disabled=!(all.y+all.n);
+    :`<div class="empty">Chưa có hạng mục không đạt.</div>`;
+  $("scale-note").textContent=`Tỷ lệ đạt = Đạt / (Đạt + Không đạt). Mục muốn bỏ qua: chấm Không đạt và ghi chú. Đạt từ ${CR.thresholds.pass}%, cần cải thiện từ ${CR.thresholds.warn}%. Nháp tự lưu trên máy này.`;
+  $("save-rep").disabled=!(all.y+all.n+cf+cn);
 }
 $("period").addEventListener("click",e=>{const b=e.target.closest("button[data-p]");if(!b)return;period=b.dataset.p;ls.set("kscl:period",period);loadDraft();renderStaff()});
 $("jump-report").onclick=()=>$("report").scrollIntoView({behavior:"smooth"});
 $("v-kiem-tra").addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;
   if(b.dataset.copyOwner){const o=b.dataset.copyOwner;openCopy("Tin nhắn gửi "+o,ownerMsg(o,issuesNow().filter(i=>i.owner===o),$("m-date").value));return}
+  const cc=b.closest(".card.carry");
+  if(cc){const id=cc.dataset.carry,it=carryList().find(x=>x.id===id);if(!it)return;
+    if(b.dataset.cph!==undefined){lbOpen(carryPhotos(it),+b.dataset.cph);return}
+    if(b.dataset.f!==undefined){const v=b.dataset.f==="1";if(D.carry[id]===v)delete D.carry[id];else D.carry[id]=v;saveDraft();cc.outerHTML=carryHTML(it);renderReport()}return}
   const card=b.closest(".card");if(!card)return;const key=card.dataset.key,r=resOf(key);
   if(b.dataset.sample!==undefined){const ins=instances().find(i=>i.key===key);lbOpen(ins.cp.samples,+b.dataset.sample);return}
   if(b.dataset.del!==undefined){const p=photosOf(key).splice(+b.dataset.del,1)[0];if(p?.id)run("deletePhoto",ADMIN,p.id).catch(()=>{});saveDraft();rerenderCard(key);return}
   if(b.hasAttribute("data-allok")){const ins=instances().find(i=>i.key===key);ins.crit.forEach(c=>{if(!r[c.id]||r[c.id].met==null)r[c.id]={met:true}});saveDraft();rerenderCard(key);return}
-  if(b.dataset.v){const cid=b.closest(".cr").dataset.cid,v=b.dataset.v==="y"?true:b.dataset.v==="n"?false:"na";
+  if(b.dataset.v){const cid=b.closest(".cr").dataset.cid,v=b.dataset.v==="y";
     if(r[cid]?.met===v)delete r[cid];else r[cid]={met:v,note:r[cid]?.note||""};
     saveDraft();rerenderCard(key);
     if(v===false)document.querySelector(`.card[data-key="${CSS.escape(key)}"] .cr[data-cid="${CSS.escape(cid)}"] input.note`)?.focus();}
@@ -703,7 +729,8 @@ $("v-kiem-tra").addEventListener("change",async e=>{
 function reportData(){
   const ins=instances(),all=score(ins);const groups={};
   for(const g of Object.keys(CR.groups)){const a=score(ins.filter(i=>i.cp.group===g));groups[g]={p:a.p}}
-  return{id:reportId(),date:$("m-date").value,period,inspector:$("m-inspector").value.trim(),overall:all.p,counts:{y:all.y,n:all.n,u:all.u,s:issuesNow().filter(i=>i.todo).length},groups,summary:$("sum").value.trim(),
+  return{id:reportId(),date:$("m-date").value,period,inspector:$("m-inspector").value.trim(),overall:all.p,counts:{y:all.y,n:all.n,u:all.u,s:0},groups,summary:$("sum").value.trim(),
+    carry:carryList().filter(i=>D.carry[i.id]!=null).map(i=>({id:i.id,fixed:D.carry[i.id],area:i.area,text:i.text,group:i.group,owner:i.owner})),
     items:ins.map(i=>{const r=D.res[i.key]||{};return{key:i.key,cpId:i.cp.id,title:i.title,sub:i.sub,group:i.cp.group,photos:photosOf(i.key).filter(p=>p.status==="ok").map(p=>p.url),
       crit:i.crit.filter(c=>r[c.id]&&r[c.id].met!=null).map(c=>({id:c.id,text:c.text,met:r[c.id].met,note:r[c.id].note||"",owner:ownerOf(c.owner),ref:c.ref}))}}).filter(i=>i.crit.length),
     issues:issuesNow(),nhom:D.nhom};
@@ -714,7 +741,8 @@ $("save-rep").onclick=async()=>{
   if(d.issues.some(i=>!i.todo&&!i.note)){toast("Vui lòng ghi chú cho mục Không đạt.");document.querySelector("input.note:placeholder-shown")?.focus();return}
   if(Object.values(D.photos).some(l=>l.some(p=>p.status==="up"))){toast("Vui lòng chờ ảnh tải xong.");return}
   const b=$("save-rep");b.disabled=true;b.textContent="Đang lưu…";
-  try{const r=await run("saveReport",ADMIN,d);toast("Đã lưu"+(r.closed?` · đóng ${r.closed} lỗi cũ đã đạt`:"")+".");STATUS=null;refreshCount()}
+  try{const r=await run("saveReport",ADMIN,d);toast("Đã lưu"+(r.fixed?` · ${r.fixed} mục tồn đã khắc phục`:"")+(r.closed-r.fixed>0?` · đóng ${r.closed-r.fixed} lỗi cũ đã đạt`:"")+".");STATUS=null;refreshCount();
+    try{CR.open=(await run("getConfig",ADMIN)).open;D.carry={};saveDraft();renderStaff()}catch(_){}}
   catch(e){adminErr(e)}
   b.textContent="Lưu kết quả";renderReport();
 };
@@ -750,19 +778,21 @@ function issueCard(i,mode){
 function renderStatus(){
   if(!STATUS)return;const s=STATUS,today=s.today,last=s.reports[0];
   $("bc-time").textContent=`Cập nhật ${s.now} · tự làm mới mỗi phút`;
-  $("bc-eyebrow").textContent=`Hạng mục chưa đạt · ${s.model}`;
   fillSelect($("f-group"),Object.entries(s.groups).map(([g,n])=>[g,g+". "+n]),"Tất cả");
   fillSelect($("f-owner"),[...new Set(s.issues.map(i=>i.owner))].sort().map(o=>[o,o]),"Tất cả");
   const f=filters(),list=s.issues.filter(i=>(!f.group||i.group===f.group)&&(!f.owner||i.owner===f.owner)&&(!f.status||i.status===f.status));
-  const late=list.filter(i=>isLate(i,today)).length,wait=list.filter(i=>i.status===WAIT).length,todo=list.filter(i=>i.status===TODO).length,open=list.filter(i=>i.status===OPEN).length,doing=list.filter(i=>i.status===DOING).length;
-  const tone=p=>({dat:"ok",can:"warn",khong:"bad",na:""})[stOf(p)];
-  $("bc-kpi").style.setProperty("--n",5);
-  $("bc-kpi").innerHTML=`<div class="bad"><span class="lb2">Chưa xử lý</span><b>${open}</b></div><div class="warn"><span class="lb2">Đang khắc phục</span><b>${doing}</b></div><div class="acc"><span class="lb2">Chờ bộ phận làm</span><b>${todo}</b></div><div class="warn"><span class="lb2">Chờ xác nhận</span><b>${wait}</b></div><div class="bad"><span class="lb2">Quá hạn</span><b>${late}</b></div>`;
-  $("bc-groups").innerHTML=`<div class="acc"><span class="lb2">Tỷ lệ đạt</span><b style="font-size:1.1rem">${last?vn(last.date):"–"}</b></div>`+Object.entries(s.groups).map(([g,n])=>{const x=last?last.groups[g]:null,c=s.issues.filter(i=>i.group===g).length;return `<div class="${tone(x)}" title="${esc(n)}"><span class="lb2">Phần ${g}</span><b>${pctTxt(x)}</b><span class="sm2">${c} lỗi mở</span></div>`}).join("");
+  const ov=s.overview||{y:0,n:0,u:0,groups:{},owners:[]},P=x=>x.y+x.n?x.y/(x.y+x.n):null,tone=p=>({dat:"ok",can:"warn",khong:"bad",na:""})[stOf(p)];
+  $("bc-eyebrow").textContent=`Toàn bộ hạng mục · ${s.model}`;
+  $("bc-kpi").style.setProperty("--n",4);
+  $("bc-kpi").innerHTML=`<div><span class="lb2">Hạng mục</span><b>${ov.y+ov.n}</b></div><div class="ok"><span class="lb2">Đạt</span><b>${ov.y}</b></div><div class="bad"><span class="lb2">Không đạt</span><b>${ov.n}</b></div><div class="${tone(P(ov))}"><span class="lb2">% đạt</span><b>${pctTxt(P(ov))}</b></div>`;
+  $("bc-groups").innerHTML=Object.entries(s.groups).map(([g,n])=>{const x=ov.groups[g]||{y:0,n:0};return `<div class="${tone(P(x))}" title="${esc(n)}"><span class="lb2">Phần ${g}</span><b>${pctTxt(P(x))}</b><span class="sm2">${x.y}/${x.y+x.n} đạt</span></div>`}).join("");
+  $("bc-groups").style.setProperty("--n",Object.keys(s.groups).length||5);
+  $("bc-note").textContent=`Mỗi hạng mục lấy kết quả lần kiểm gần nhất (ngày, tuần hoặc tháng); mục đã khắc phục tính là Đạt.${ov.u?` ${ov.u} hạng mục chưa kiểm lần nào, chưa tính.`:""}${last?` Lần kiểm gần nhất ${vn(last.date)} · kỳ ${last.period}.`:""}`;
+  $("bc-owners").innerHTML=ov.owners.filter(o=>o.y+o.n).length?ov.owners.filter(o=>o.y+o.n).map(o=>`<tr><td><b>${esc(o.name)}</b></td><td class="num r">${o.y+o.n}</td><td class="num r">${o.y}</td><td class="num r" style="${o.n?"color:var(--bad);font-weight:700":""}">${o.n}</td><td class="r"><span class="chip ${stOf(P(o))}">${pctTxt(P(o))}</span></td></tr>`).join(""):`<tr><td colspan="5" class="muted">Chưa có lần kiểm.</td></tr>`;
   $("bc-list").innerHTML=list.length?Object.entries(s.groups).map(([g,n])=>{const gl=list.filter(i=>i.group===g).sort((a,b)=>a.due<b.due?-1:1);if(!gl.length)return"";
     return `<section class="grp"><div class="grp-h"><h2><span class="code">${g}</span>${esc(n)}</h2><span class="chip khong">${gl.length} mục</span></div>${gl.map(i=>issueCard(i,"report")).join("")}</section>`}).join("")
     :`<div class="empty">${s.issues.length?"Không có mục phù hợp bộ lọc.":"Không còn hạng mục chưa đạt."}</div>`;
-  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.nhom||"—")}</td><td>${esc(r.inspector)}</td><td class="r"><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num r">${r.y} / ${r.n} / ${r.s||0}</td></tr>`).join(""):`<tr><td colspan="6" class="muted">Chưa có lần kiểm.</td></tr>`;
+  $("bc-hist").innerHTML=s.reports.length?s.reports.map(r=>`<tr><td class="num">${vn(r.date)}</td><td>${esc(r.period)}</td><td>${esc(r.nhom||"—")}</td><td>${esc(r.inspector)}</td><td class="r"><span class="chip ${stOf(r.overall)}">${pctTxt(r.overall)}</span></td><td class="num r">${r.y} / ${r.n}</td></tr>`).join(""):`<tr><td colspan="6" class="muted">Chưa có lần kiểm.</td></tr>`;
 }
 $("v-bao-cao").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;
