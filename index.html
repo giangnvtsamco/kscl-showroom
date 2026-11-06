@@ -614,7 +614,7 @@ const carryPhotos=i=>[{id:i.samples?.[0]?.id||"",caption:"Mẫu chuẩn VinFast"
 function carryHTML(i){const v=D.carry[i.id],ph=carryPhotos(i);
   return `<div class="card carry" data-carry="${esc(i.id)}"><div class="card-top"><div><h3>${esc(i.area)}</h3><div class="sub">${esc(i.owner)}</div></div><span class="chip can">Từ kỳ ${FREQ[i.period]||FREQ[i.freq]}</span></div>
     <div class="t">${esc(i.text)}</div>
-    <div class="prev"><div><span class="chip khong">Không đạt · ${vn(i.date)}</span></div>${i.note?`<div>Lỗi: ${esc(i.note)}</div>`:""}${i.status===WAIT?`<div style="color:var(--warn);font-weight:600">Bộ phận báo đã khắc phục${i.fix?": "+esc(i.fix):""}</div>`:i.status===DOING?`<div style="color:var(--warn)">Bộ phận đang khắc phục${i.eta?", dự kiến xong "+vn(i.eta):""}</div>`:""}
+    <div class="prev"><div><span class="chip khong">Không đạt · ${vn(i.date)}</span></div>${i.note?`<div style="color:var(--bad)">Ghi chú: ${esc(i.note)}</div>`:""}${i.status===WAIT?`<div style="color:var(--warn);font-weight:600">Bộ phận báo đã khắc phục${i.fix?": "+esc(i.fix):""}</div>`:i.status===DOING?`<div style="color:var(--warn)">Bộ phận đang khắc phục${i.eta?", dự kiến xong "+vn(i.eta):""}</div>`:""}
       ${ph.length?`<div class="imgs">${ph.map((x,k)=>`<button data-cph="${k}" aria-label="${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,240)}" alt="${esc(x.caption)}"></button>`).join("")}</div>`:""}</div>
     <div class="seg fix" role="group" aria-label="Khắc phục"><button data-f="1" aria-pressed="${v===true}">Đã khắc phục</button><button data-f="0" aria-pressed="${v===false}">Chưa khắc phục</button></div></div>`}
 function crHTML(ins,c){
@@ -768,7 +768,7 @@ function issueCard(i,mode){
   return `<div class="iss ${stCls(i.status)}" data-row="${i.row}" data-id="${esc(i.id)}" data-rep="${esc(i.report)}">
     <div class="top"><div style="min-width:0"><b>${esc(i.area)}</b><div style="font-size:.92rem">${esc(i.text)}</div></div><span class="status ${stCls(i.status)}">${esc(i.status)}</span></div>
     <div class="meta2"><span>${esc(i.owner)}</span><span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${i.status===DOING&&i.eta?" · dự kiến xong "+vn(i.eta):""}${late?" · quá hạn":""}</span></div>
-    ${i.note?`<div class="small">${isSkip(i)?"Ghi chú":"Lỗi"}: ${esc(i.note)}</div>`:""}
+    ${i.note?`<div class="small" style="color:var(--bad)">Ghi chú: ${esc(i.note)}</div>`:""}
     ${i.review&&i.status===OPEN?`<div class="rev">Lý do trả lại: ${esc(i.review)}</div>`:""}
     ${i.fix?`<div class="fix"><b>${i.status===DOING?"Đang khắc phục":"Khắc phục"}:</b> ${esc(i.fix)} <span class="muted small">— ${esc(i.fixBy)}, ${esc(i.fixAt)}</span></div>`:""}
     ${trioHTML(i,mode)}
@@ -838,7 +838,7 @@ function renderDept(){
       <div class="top"><div style="min-width:0"><span class="eyebrow">${i.group}${i.cpName?" · "+esc(i.cpName):""}</span><br><b>${esc(i.area)}</b><div style="font-size:.92rem">${esc(i.text)}</div></div><span class="status ${stCls(i.status)}">${esc(i.status)}</span></div>
       ${tk?`<div class="banner info small">Tổ kiểm tra chưa chấm mục này. Nhờ bộ phận tự kiểm tra, ghi kết quả và chụp ảnh.</div>`:""}
       <div class="meta2">${DEPT.manager?`<span>${esc(i.owner)}</span>`:""}<span>Kiểm ${vn(i.date)}</span><span class="due${late?" late":""}">Hạn ${vn(i.due)}${i.status===DOING&&i.eta?" · dự kiến xong "+vn(i.eta):""}${late?" · quá hạn":""}</span></div>
-      ${i.note?`<div class="small">${tk?"Ghi chú":"Lỗi"}: ${esc(i.note)}</div>`:""}
+      ${i.note?`<div class="small" style="color:var(--bad)">Ghi chú: ${esc(i.note)}</div>`:""}
       ${i.review&&i.status===OPEN?`<div class="rev">Người kiểm trả lại: ${esc(i.review)}</div>`:""}
       ${trioHTML(i,"dept")}
       <div class="fxmode" role="group" aria-label="Tình trạng"><button data-mode="done" aria-pressed="${dr.mode!=="doing"}">${tk?"Đã kiểm tra xong":"Đã khắc phục"}</button><button data-mode="doing" aria-pressed="${dr.mode==="doing"}">${tk?"Cần thêm thời gian":"Đang khắc phục · cần thời gian"}</button></div>
