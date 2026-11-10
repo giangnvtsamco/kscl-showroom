@@ -586,6 +586,9 @@ period=ls.get("kscl:period")||"day";if(!INCL[period])period="day";
 let D=null;
 const reportId=()=>$("m-date").value+"_"+period;
 const draftKey=()=>"kscl:draft:"+reportId();
+/* Dọn nháp trên máy cũ hơn 60 ngày (nháp theo ngày_kỳ, nhóm trực theo ngày) để bộ nhớ trình duyệt không đầy */
+(function donNhapCu(){try{const han=new Date(Date.now()-60*864e5).toISOString().slice(0,10);
+  Object.keys(localStorage).forEach(k=>{const m=k.match(/^kscl:(?:draft|nhom):(\d{4}-\d{2}-\d{2})/);if(m&&m[1]<han)localStorage.removeItem(k)})}catch(_){}})();
 function loadDraft(){D=ls.get(draftKey())||{res:{},photos:{},sum:""};D.res=D.res||{};D.photos=D.photos||{};D.carry=D.carry||{};$("sum").value=D.sum||"";if(D.nhom==null)D.nhom=ls.get("kscl:nhom:"+$("m-date").value)||null}
 let saveT;function saveDraft(){clearTimeout(saveT);saveT=setTimeout(()=>{const copy={res:D.res,sum:D.sum,nhom:D.nhom,carry:D.carry,photos:{}};for(const k in D.photos)copy.photos[k]=D.photos[k].filter(p=>p.status==="ok").map(p=>({id:p.id,url:p.url,status:"ok"}));ls.set(draftKey(),copy)},300)}
 $("m-inspector").addEventListener("change",e=>ls.set("kscl:inspector",e.target.value.trim()));
