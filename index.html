@@ -183,6 +183,12 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .tag.smp{cursor:pointer;border:1px solid var(--accent);color:var(--accent);background:var(--accent-soft);font:inherit;font-size:inherit;font-weight:700}
 .samples .cap{font-size:.68rem;line-height:1.3;color:var(--muted);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .photos{display:flex;flex-wrap:wrap;gap:8px}
+.sa{display:flex;flex-direction:column;gap:8px}
+.sa:not([data-one])+.sa{border-top:1px dashed var(--line);padding-top:10px}
+.sa-h{font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.sa-old{display:flex;flex-direction:column;gap:6px;border:1.5px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:10px;font-size:.82rem}
+.sa-old b{color:var(--warn)}
+.ph-old{display:flex;flex-direction:column;gap:4px;width:110px}.ph-old img{width:110px;height:80px;object-fit:cover;border-radius:8px}.ph-old select{font:inherit;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:3px;background:var(--paper);color:var(--ink)}
 .ph{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;background:var(--paper-2);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);text-align:center}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .ph .st{position:absolute;left:0;right:0;bottom:0;font-size:.6rem;background:var(--scrim);color:var(--on-scrim);padding:2px 3px;text-align:center}
@@ -657,8 +663,17 @@ const cpHome=cp=>{const n={};cp.criteria.forEach(c=>{const r=String(c.route||"")
 const cardSamples=card=>{const seen=new Set(),out=[];const add=x=>{if(!seen.has(x.id)){seen.add(x.id);out.push(x)}};
   card.items.forEach(({c})=>(c.samples||[]).forEach(add));(card.carry||[]).forEach(i=>(i.samples||[]).slice(0,1).forEach(add));if(out.length)return out;
   card.cps.forEach(cp=>{if(card.route&&cpHome(cp)!==card.route)return;(cp.samples||[]).forEach(x=>{if(!seen.has(x.id)){seen.add(x.id);out.push(x)}})});return out};
-/* ảnh chụp ở thẻ dùng chung cho mọi khu vực trong thẻ */
-function insPhotos(ik){const out=[];walkCards().forEach(card=>{if(card.items.some(x=>x.ins.key===ik))photosOf(card.key).forEach(p=>{if(p.status==="ok"&&!out.includes(p.url))out.push(p.url)})});return out}
+/* ảnh chụp theo từng khu vực (hạng mục) trong khối: lỗi nào dùng ảnh khu vực đó, không lệch sang khu vực khác */
+/* các khu vực trong thẻ (gom theo tên khu vực), theo thứ tự xuất hiện. pk = khóa ảnh của khu vực */
+function cardGroups(card){const m=new Map();card.items.forEach(x=>{const n=x.ins.cp.name;if(!m.has(n))m.set(n,{name:n,pk:card.key+"::"+n,guide:x.ins.cp.guide||"",keys:new Set(),items:[]});const g=m.get(n);g.keys.add(x.ins.key);g.items.push(x)});return[...m.values()]}
+/* ảnh của từng hạng mục (ins.key) = ảnh khu vực chứa hạng mục đó */
+function photoMap(){const out={};walkCards().forEach(card=>cardGroups(card).forEach(g=>{const u=photosOf(g.pk).filter(p=>p.status==="ok").map(p=>p.url);g.keys.forEach(k=>{out[k]=(out[k]||[]).concat(u.filter(x=>!(out[k]||[]).includes(x)))})}));return out}
+let PM_=null;const insPhotos=ik=>(PM_||photoMap())[ik]||[];
+/* nháp bản trước (ảnh chung cả khối): thẻ chỉ 1 khu vực thì tự gán; nhiều khu vực thì chờ chọn */
+function legacyPhotos(card){const l=D.photos[card.key];if(!l||!l.length)return[];
+  const gs=cardGroups(card);if(!gs.length)return[];if(gs.length===1){photosOf(gs[0].pk).push(...l.splice(0));saveDraft();return[]}return l}
+const photoStrip=(pk,ph,label)=>`<div class="photos" data-pk="${esc(pk)}">${ph.map((p,i)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh ${i+1}">`:(p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:"")}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi, xóa và chụp lại"}</span>`:""}<button data-del="${i}" aria-label="Xóa ảnh">×</button></div>`).join("")}
+      <label class="pick"><span class="plus">+</span>${esc(label||"Thêm ảnh")}<input type="file" accept="image/*" multiple></label></div>`;
 function score(list){let y=0,n=0,u=0;for(const i of list){const r=D.res[i.key]||{};for(const c of i.crit){const m=r[c.id]?.met;if(m===true)y++;else if(m===false)n++;else u++}}return{y,n,u,p:(y+n)?y/(y+n):null}}
 /* mục tồn: lỗi còn mở của tiêu chí kỳ lớn hơn, phát hiện trước ngày kiểm này */
 function carryList(){if(!CR||!CR.open)return[];const date=$("m-date").value,rid=reportId();return CR.open.filter(i=>CARRY_TO[period].includes(i.freq)&&i.date<=date&&i.report!==rid).sort((a,b)=>a.group<b.group?-1:a.group>b.group?1:a.date<b.date?-1:1)}
@@ -680,17 +695,18 @@ function crHTML(ins,c){
     <div class="seg" role="group" aria-label="Kết quả">${[["y","Đạt"],["n","Không đạt"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${pr(v)}">${l}</button>`).join("")}</div></li>`;
 }
 function cardHTML(card){
-  const sc=scoreItems(card.items),st=sc.p==null?"":stOf(sc.p),ph=photosOf(card.key),sm=cardSamples(card);
-  const guide=[...new Set(card.cps.map(cp=>cp.guide).filter(Boolean))].join(" · ");
+  const sc=scoreItems(card.items),st=sc.p==null?"":stOf(sc.p),sm=cardSamples(card),gs=cardGroups(card),old=legacyPhotos(card);
+  const one=gs.length<=1;
+  const groupHTML=g=>`<div class="sa"${one?' data-one':''}>${one?"":`<div class="sa-h">${esc(g.name)}</div>`}<ul class="crit">${g.items.map(x=>crHTML(x.ins,x.c)).join("")}</ul>
+    ${g.guide?`<div class="guide">Cách chụp: ${esc(g.guide)}</div>`:""}${photoStrip(g.pk,photosOf(g.pk),one?"Thêm ảnh":"Ảnh "+g.name)}</div>`;
+  const oldHTML=old.length?`<div class="sa-old"><b>${old.length} ảnh chụp chung cả khối (bản trước)</b><span>Chọn khu vực cho từng ảnh để báo cáo không bị lệch.</span>
+    <div class="photos">${old.map((p,i)=>`<div class="ph-old">${p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:""}<select data-move="${i}" aria-label="Chọn khu vực cho ảnh ${i+1}"><option value="">Khu vực…</option>${gs.map(g=>`<option value="${esc(g.pk)}">${esc(g.name)}</option>`).join("")}</select></div>`).join("")}</div></div>`:"";
   return `<div class="card${(card.carry||[]).length?" has-carry":""}" data-key="${esc(card.key)}" data-st="${st}">
     <div class="card-top"><div><h3>${esc(card.title)}</h3>${card.sub?`<div class="sub">${esc(card.sub)}</div>`:""}</div>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${sc.u?`<button class="allok" data-allok>Đạt hết ${sc.u} mục còn lại</button>`:""}${card.items.length?`<span class="chip ${st||"na"}">${sc.p==null?"Chưa chấm":pctTxt(sc.p)}</span>`:`<span class="chip can">Kỳ trước</span>`}</div></div>
     ${sm.length?`<div class="samples"><div class="eyebrow">Mẫu chuẩn VinFast</div><div class="row">${sm.map((x,k)=>`<button data-sample="${k}" aria-label="Xem ảnh mẫu: ${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,300)}" alt="${esc(x.caption)}"><span class="cap">${esc(x.caption)}</span></button>`).join("")}</div></div>`:""}
     ${(card.carry||[]).length?`<ul class="crit carry-list">${card.carry.map(carryHTML).join("")}</ul>`:""}
-    ${card.items.length?`<ul class="crit">${card.items.map(x=>crHTML(x.ins,x.c)).join("")}</ul>`:""}
-    ${guide?`<div class="guide">Cách chụp: ${esc(guide)}</div>`:""}
-    <div class="photos"${card.items.length?"":" hidden"}>${ph.map((p,i)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh ${i+1}">`:(p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:"")}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi, xóa và chụp lại"}</span>`:""}<button data-del="${i}" aria-label="Xóa ảnh">×</button></div>`).join("")}
-      <label class="pick"><span class="plus">+</span>Thêm ảnh<input type="file" accept="image/*" multiple></label></div>
+    ${oldHTML}${gs.map(groupHTML).join("")}
   </div>`;
 }
 function renderStaff(){
@@ -716,10 +732,10 @@ function rerenderCard(key){
 }
 const iss0=()=>issuesNow();
 function issuesNow(){
-  const date=$("m-date").value,out=[];
+  const date=$("m-date").value,out=[];PM_=photoMap();
   for(const ins of instances()){const r=D.res[ins.key]||{};const ph=insPhotos(ins.key);
     for(const c of ins.crit)if(r[c.id]?.met===false)out.push({todo:false,id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(c.samples||[])[0]?.id||(ins.cp.samples||[])[0]?.id||""})}
-  return out;
+  PM_=null;return out;
 }
 const dueTxt=(iso,ref)=>iso===ref?"trong ngày":"trước "+vn(iso);
 const fixLink=o=>location.origin+location.pathname+"?trang=khac-phuc";
@@ -759,7 +775,7 @@ $("v-kiem-tra").addEventListener("click",e=>{
   const card=b.closest(".card");if(!card)return;const key=card.dataset.key,wc=walkCards().find(c=>c.key===key);if(!wc)return;
   if(b.dataset.sample!==undefined){lbOpen(cardSamples(wc),+b.dataset.sample);return}
   if(b.dataset.crs){const it=wc.items.find(x=>x.c.id===b.dataset.crs);if(it)lbOpen(it.c.samples||[],0);return}
-  if(b.dataset.del!==undefined){const p=photosOf(key).splice(+b.dataset.del,1)[0];if(p?.id)run("deletePhoto",ADMIN,p.id).catch(()=>{});saveDraft();rerenderCard(key);return}
+  if(b.dataset.del!==undefined){const pk=b.closest(".photos")?.dataset.pk||key;const p=photosOf(pk).splice(+b.dataset.del,1)[0];if(p?.id)run("deletePhoto",ADMIN,p.id).catch(()=>{});saveDraft();rerenderCard(key);return}
   if(b.hasAttribute("data-allok")){wc.items.forEach(({ins,c})=>{const r=resOf(ins.key);if(!r[c.id]||r[c.id].met==null)r[c.id]={met:true}});saveDraft();rerenderCard(key);return}
   if(b.dataset.v){const row=b.closest(".cr"),cid=row.dataset.cid,ik=row.dataset.ik,r=resOf(ik),v=b.dataset.v==="y";
     if(r[cid]?.met===v)delete r[cid];else r[cid]={met:v,note:r[cid]?.note||""};
@@ -769,21 +785,24 @@ $("v-kiem-tra").addEventListener("click",e=>{
 $("v-kiem-tra").addEventListener("input",e=>{const t=e.target;if(!t.classList.contains("note"))return;const row=t.closest(".cr"),r=resOf(row.dataset.ik)[row.dataset.cid];if(r){r.note=t.value;saveDraft()}});
 $("v-kiem-tra").addEventListener("change",async e=>{
   const t=e.target;if(t.classList.contains("note")){renderReport();return}
+  if(t.dataset.move!==undefined){const key=t.closest(".card").dataset.key,l=D.photos[key]||[];if(!t.value)return;const p=l.splice(+t.dataset.move,1)[0];if(p)photosOf(t.value).push(p);saveDraft();rerenderCard(key);return}
   if(!t.matches('input[type=file]'))return;
   const key=t.closest(".card").dataset.key,wc=walkCards().find(c=>c.key===key);if(!wc)return;
+  const pk=t.closest(".photos").dataset.pk,g=cardGroups(wc).find(x=>x.pk===pk);
+  const label=(wc.sub?wc.sub+" - ":"")+wc.title+(g&&cardGroups(wc).length>1?" - "+g.name:"");
   const files=[...t.files];t.value="";
   for(const f of files){
-    const p={status:"up"};photosOf(key).push(p);
+    const p={status:"up"};photosOf(pk).push(p);
     try{p.thumb=await resize(f,240,0.7);rerenderCard(key);
       const full=await resize(f,1600,0.82);
-      const r=await run("uploadPhoto",ADMIN,reportId(),(wc.sub?wc.sub+" - ":"")+wc.title,full);
+      const r=await run("uploadPhoto",ADMIN,reportId(),label,full);
       Object.assign(p,r,{status:"ok"});saveDraft();
     }catch(err){p.status="err";adminErr(err)}
     rerenderCard(key);
   }
 });
 function reportData(){
-  const ins=instances(),all=score(ins);const groups={};
+  const ins=instances(),all=score(ins);const groups={};PM_=photoMap();
   for(const g of Object.keys(CR.groups)){const a=score(ins.filter(i=>i.cp.group===g));groups[g]={p:a.p}}
   return{id:reportId(),date:$("m-date").value,period,inspector:$("m-inspector").value.trim(),overall:all.p,counts:{y:all.y,n:all.n,u:all.u,s:0},groups,summary:$("sum").value.trim(),
     carry:carryList().filter(i=>D.carry[i.id]!=null).map(i=>({id:i.id,fixed:D.carry[i.id],area:i.area,text:i.text,group:i.group,owner:i.owner})),
@@ -796,6 +815,8 @@ $("save-rep").onclick=async()=>{
   if(hasNhom()&&!nhomObj()){toast("Vui lòng chọn nhóm trực.");$("nhom-wrap").scrollIntoView({behavior:"smooth",block:"center"});return}
   if(d.issues.some(i=>!i.todo&&!i.note)){toast("Vui lòng ghi chú cho mục Không đạt.");document.querySelector("input.note:placeholder-shown")?.focus();return}
   if(Object.values(D.photos).some(l=>l.some(p=>p.status==="up"))){toast("Vui lòng chờ ảnh tải xong.");return}
+  const chuaGan=walkCards().reduce((n,c)=>n+legacyPhotos(c).length,0);
+  if(chuaGan){toast("Còn "+chuaGan+" ảnh chụp chung chưa chọn khu vực.");document.querySelector(".sa-old")?.scrollIntoView({behavior:"smooth",block:"center"});return}
   const b=$("save-rep");b.disabled=true;b.textContent="Đang lưu…";
   try{const r=await run("saveReport",ADMIN,d);toast("Đã lưu"+(r.fixed?` · ${r.fixed} mục tồn đã khắc phục`:"")+(r.closed-r.fixed>0?` · đóng ${r.closed-r.fixed} lỗi cũ đã đạt`:"")+".");STATUS=null;refreshCount();
     try{CR.open=(await run("getConfig",ADMIN)).open;D.carry={};saveDraft();renderStaff()}catch(_){}}
