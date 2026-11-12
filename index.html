@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="KSCL SAMCO">
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="shortcut icon" href="favicon.ico">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <base target="_blank">
 <title>Kiểm soát chất lượng · SAMCO</title>
 <script>try{var t=JSON.parse(localStorage.getItem("kscl:theme"));if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
@@ -183,12 +183,10 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .tag.smp{cursor:pointer;border:1px solid var(--accent);color:var(--accent);background:var(--accent-soft);font:inherit;font-size:inherit;font-weight:700}
 .samples .cap{font-size:.68rem;line-height:1.3;color:var(--muted);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .photos{display:flex;flex-wrap:wrap;gap:8px}
+.cr .photos{gap:6px;margin-top:6px}.cr .ph,.cr .pick{width:56px;height:56px;font-size:.62rem}.cr .pick .plus{font-size:1rem}
 .sa{display:flex;flex-direction:column;gap:8px}
 .sa:not([data-one])+.sa{border-top:1px dashed var(--line);padding-top:10px}
 .sa-h{font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-.sa-old{display:flex;flex-direction:column;gap:6px;border:1.5px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:10px;font-size:.82rem}
-.sa-old b{color:var(--warn)}
-.ph-old{display:flex;flex-direction:column;gap:4px;width:110px}.ph-old img{width:110px;height:80px;object-fit:cover;border-radius:8px}.ph-old select{font:inherit;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:3px;background:var(--paper);color:var(--ink)}
 .ph{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;background:var(--paper-2);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);text-align:center}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .ph .st{position:absolute;left:0;right:0;bottom:0;font-size:.6rem;background:var(--scrim);color:var(--on-scrim);padding:2px 3px;text-align:center}
@@ -432,13 +430,14 @@ window.addEventListener("error",function(e){showFatal((e.message||"lỗi không 
   </div>
 </div>
 
+<script src="config.js"></script>
 <script>
 const BOOT={view:"",bp:""};
 (function(){
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 /* ==== DÁN LINK /exec CỦA APPS SCRIPT VÀO GIỮA HAI DẤU NGOẶC KÉP DƯỚI ĐÂY ==== */
-const API_URL = "https://script.google.com/macros/s/AKfycbzQgF6q-2_1xeocoPbiE5EbhULFTdJUPQQ8Q65g29HJBK0Y_FAnv-9LwHzFErrau93AZA/exec";
+const API_URL = String(window.API_URL || ""); // link /exec nằm trong config.js
 /* ============================================================================ */
 // Gọi máy chủ Apps Script. Gửi dạng text/plain và không kèm cookie nên không dính tài khoản Google trên trình duyệt.
 const run=(fn,...args)=>{
@@ -669,12 +668,12 @@ const cardSamples=card=>{const seen=new Set(),out=[];const add=x=>{if(!seen.has(
 /* ảnh chụp theo từng khu vực (hạng mục) trong khối: lỗi nào dùng ảnh khu vực đó, không lệch sang khu vực khác */
 /* các khu vực trong thẻ (gom theo tên khu vực), theo thứ tự xuất hiện. pk = khóa ảnh của khu vực */
 function cardGroups(card){const m=new Map();card.items.forEach(x=>{const n=x.ins.cp.name;if(!m.has(n))m.set(n,{name:n,pk:card.key+"::"+n,guide:x.ins.cp.guide||"",keys:new Set(),items:[]});const g=m.get(n);g.keys.add(x.ins.key);g.items.push(x)});return[...m.values()]}
-/* ảnh của từng hạng mục (ins.key) = ảnh khu vực chứa hạng mục đó */
-function photoMap(){const out={};walkCards().forEach(card=>cardGroups(card).forEach(g=>{const u=photosOf(g.pk).filter(p=>p.status==="ok").map(p=>p.url);g.keys.forEach(k=>{out[k]=(out[k]||[]).concat(u.filter(x=>!(out[k]||[]).includes(x)))})}));return out}
+/* ảnh chụp theo từng tiêu chí: khóa "C:<hạng mục>|<mã tiêu chí>" */
+const crPk=(ik,cid)=>"C:"+ik+"|"+cid;
+const crPhotos=(ik,cid)=>photosOf(crPk(ik,cid)).filter(p=>p.status==="ok").map(p=>p.url);
+/* ảnh của hạng mục = gộp ảnh các tiêu chí của hạng mục (lưu vào Chi tiết) */
+function photoMap(){const out={};for(const i of instances()){const u=[];i.crit.forEach(c=>crPhotos(i.key,c.id).forEach(x=>{if(!u.includes(x))u.push(x)}));out[i.key]=u}return out}
 let PM_=null;const insPhotos=ik=>(PM_||photoMap())[ik]||[];
-/* nháp bản trước (ảnh chung cả khối): thẻ chỉ 1 khu vực thì tự gán; nhiều khu vực thì chờ chọn */
-function legacyPhotos(card){const l=D.photos[card.key];if(!l||!l.length)return[];
-  const gs=cardGroups(card);if(!gs.length)return[];if(gs.length===1){photosOf(gs[0].pk).push(...l.splice(0));saveDraft();return[]}return l}
 const photoStrip=(pk,ph,label)=>`<div class="photos" data-pk="${esc(pk)}">${ph.map((p,i)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh ${i+1}">`:(p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:"")}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi, xóa và chụp lại"}</span>`:""}<button data-del="${i}" aria-label="Xóa ảnh">×</button></div>`).join("")}
       <label class="pick"><span class="plus">+</span>${esc(label||"Thêm ảnh")}<input type="file" accept="image/*" multiple></label></div>`;
 function score(list){let y=0,n=0,u=0;for(const i of list){const r=D.res[i.key]||{};for(const c of i.crit){const m=r[c.id]?.met;if(m===true)y++;else if(m===false)n++;else u++}}return{y,n,u,p:(y+n)?y/(y+n):null}}
@@ -694,22 +693,22 @@ function crHTML(ins,c){
   return `<li class="cr" data-ik="${esc(ins.key)}" data-cid="${esc(c.id)}"><div class="t">${esc(c.text)}${sw}
     <div class="tags">${c.route?`<span class="tag vfp" data-g="${esc(ins.cp.group)}">${esc(ins.cp.group)} · ${esc(String(c.id).split("-")[0])}</span>`:""}<span class="tag">${FREQ[c.freq]}</span><span class="tag">${esc(ownerTag(c.owner))}</span>${c.ref?`<span class="tag">${esc(c.ref)}</span>`:""}${(c.samples||[]).length?`<button class="tag smp" data-crs="${esc(c.id)}" aria-label="Xem ảnh mẫu của tiêu chí">Ảnh mẫu · ${c.samples.length}</button>`:""}</div>
     ${c.full&&c.full!==c.text?`<details class="full"><summary>Nguyên văn VinFast · ${esc(c.id)}</summary><p>${esc(c.full)}</p></details>`:""}
-    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:""}</div>
+    ${met===false?`<input class="note" type="text" value="${esc(r.note||"")}" placeholder="Ghi chú lỗi (bắt buộc)" aria-label="Ghi chú lỗi">`:""}
+    ${photoStrip(crPk(ins.key,c.id),photosOf(crPk(ins.key,c.id)),"Ảnh")}</div>
     <div class="seg" role="group" aria-label="Kết quả">${[["y","Đạt"],["n","Không đạt"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${pr(v)}">${l}</button>`).join("")}</div></li>`;
 }
 function cardHTML(card){
-  const sc=scoreItems(card.items),st=sc.p==null?"":stOf(sc.p),sm=cardSamples(card),gs=cardGroups(card),old=legacyPhotos(card);
+  const sc=scoreItems(card.items),st=sc.p==null?"":stOf(sc.p),sm=cardSamples(card),gs=cardGroups(card);
   const one=gs.length<=1;
   const groupHTML=g=>`<div class="sa"${one?' data-one':''}>${one?"":`<div class="sa-h">${esc(g.name)}</div>`}<ul class="crit">${g.items.map(x=>crHTML(x.ins,x.c)).join("")}</ul>
-    ${g.guide?`<div class="guide">Cách chụp: ${esc(g.guide)}</div>`:""}${photoStrip(g.pk,photosOf(g.pk),one?"Thêm ảnh":"Ảnh "+g.name)}</div>`;
-  const oldHTML=old.length?`<div class="sa-old"><b>${old.length} ảnh chụp chung cả khối (bản trước)</b><span>Chọn khu vực cho từng ảnh để báo cáo không bị lệch.</span>
-    <div class="photos">${old.map((p,i)=>`<div class="ph-old">${p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:""}<select data-move="${i}" aria-label="Chọn khu vực cho ảnh ${i+1}"><option value="">Khu vực…</option>${gs.map(g=>`<option value="${esc(g.pk)}">${esc(g.name)}</option>`).join("")}</select></div>`).join("")}</div></div>`:"";
+    ${g.guide?`<div class="guide">Cách chụp: ${esc(g.guide)}</div>`:""}</div>`;
+
   return `<div class="card${(card.carry||[]).length?" has-carry":""}" data-key="${esc(card.key)}" data-st="${st}">
     <div class="card-top"><div><h3>${esc(card.title)}</h3>${card.sub?`<div class="sub">${esc(card.sub)}</div>`:""}</div>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${sc.u?`<button class="allok" data-allok>Đạt hết ${sc.u} mục còn lại</button>`:""}${card.items.length?`<span class="chip ${st||"na"}">${sc.p==null?"Chưa chấm":pctTxt(sc.p)}</span>`:`<span class="chip can">Kỳ trước</span>`}</div></div>
     ${sm.length?`<div class="samples"><div class="eyebrow">Mẫu chuẩn VinFast</div><div class="row">${sm.map((x,k)=>`<button data-sample="${k}" aria-label="Xem ảnh mẫu: ${esc(x.caption)}"><img loading="lazy" src="${thumb(x.id,300)}" alt="${esc(x.caption)}"><span class="cap">${esc(x.caption)}</span></button>`).join("")}</div></div>`:""}
     ${(card.carry||[]).length?`<ul class="crit carry-list">${card.carry.map(carryHTML).join("")}</ul>`:""}
-    ${oldHTML}${gs.map(groupHTML).join("")}
+    ${gs.map(groupHTML).join("")}
   </div>`;
 }
 function renderStaff(){
@@ -736,12 +735,12 @@ function rerenderCard(key){
 const iss0=()=>issuesNow();
 function issuesNow(){
   const date=$("m-date").value,out=[];PM_=photoMap();
-  for(const ins of instances()){const r=D.res[ins.key]||{};const ph=insPhotos(ins.key);
-    for(const c of ins.crit)if(r[c.id]?.met===false)out.push({todo:false,id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:ph,sample:(c.samples||[])[0]?.id||(ins.cp.samples||[])[0]?.id||""})}
+  for(const ins of instances()){const r=D.res[ins.key]||{};
+    for(const c of ins.crit)if(r[c.id]?.met===false)out.push({todo:false,id:ins.key+"|"+c.id,owner:ownerOf(c.owner),area:ins.title+(ins.sub?" ("+ins.sub+")":""),group:ins.cp.group,cpId:ins.cp.id,text:c.text,note:r[c.id].note||"",ref:c.ref||"",freq:c.freq,due:addDays(date,CR.due[c.freq]??0),photos:crPhotos(ins.key,c.id),sample:(c.samples||[])[0]?.id||(ins.cp.samples||[])[0]?.id||""})}
   PM_=null;return out;
 }
 const dueTxt=(iso,ref)=>iso===ref?"trong ngày":"trước "+vn(iso);
-const fixLink=o=>location.origin+location.pathname+"?trang=khac-phuc";
+const fixLink=o=>new URL("khac-phuc",location.href).href; // trang Khắc phục của bộ phận
 function ownerMsg(owner,list,date){
   const insp=$("m-inspector").value.trim(),link=fixLink(owner);
   const loi=list.filter(i=>!i.todo),tu=list.filter(i=>i.todo),line=(i,k)=>`${k+1}. ${i.area}: ${i.text}${i.note?` (${i.note})`:""} — hạn ${dueTxt(i.due,date)}`;
@@ -788,11 +787,10 @@ $("v-kiem-tra").addEventListener("click",e=>{
 $("v-kiem-tra").addEventListener("input",e=>{const t=e.target;if(!t.classList.contains("note"))return;const row=t.closest(".cr"),r=resOf(row.dataset.ik)[row.dataset.cid];if(r){r.note=t.value;saveDraft()}});
 $("v-kiem-tra").addEventListener("change",async e=>{
   const t=e.target;if(t.classList.contains("note")){renderReport();return}
-  if(t.dataset.move!==undefined){const key=t.closest(".card").dataset.key,l=D.photos[key]||[];if(!t.value)return;const p=l.splice(+t.dataset.move,1)[0];if(p)photosOf(t.value).push(p);saveDraft();rerenderCard(key);return}
   if(!t.matches('input[type=file]'))return;
   const key=t.closest(".card").dataset.key,wc=walkCards().find(c=>c.key===key);if(!wc)return;
-  const pk=t.closest(".photos").dataset.pk,g=cardGroups(wc).find(x=>x.pk===pk);
-  const label=(wc.sub?wc.sub+" - ":"")+wc.title+(g&&cardGroups(wc).length>1?" - "+g.name:"");
+  const pk=t.closest(".photos").dataset.pk,cid=pk.split("|").pop();
+  const label=(wc.sub?wc.sub+" - ":"")+wc.title+" - "+cid;
   const files=[...t.files];t.value="";
   for(const f of files){
     const p={status:"up"};photosOf(pk).push(p);
@@ -818,8 +816,6 @@ $("save-rep").onclick=async()=>{
   if(hasNhom()&&!nhomObj()){toast("Vui lòng chọn nhóm trực.");$("nhom-wrap").scrollIntoView({behavior:"smooth",block:"center"});return}
   if(d.issues.some(i=>!i.todo&&!i.note)){toast("Vui lòng ghi chú cho mục Không đạt.");document.querySelector("input.note:placeholder-shown")?.focus();return}
   if(Object.values(D.photos).some(l=>l.some(p=>p.status==="up"))){toast("Vui lòng chờ ảnh tải xong.");return}
-  const chuaGan=walkCards().reduce((n,c)=>n+legacyPhotos(c).length,0);
-  if(chuaGan){toast("Còn "+chuaGan+" ảnh chụp chung chưa chọn khu vực.");document.querySelector(".sa-old")?.scrollIntoView({behavior:"smooth",block:"center"});return}
   const b=$("save-rep");b.disabled=true;b.textContent="Đang lưu…";
   try{const r=await run("saveReport",ADMIN,d);toast("Đã lưu"+(r.fixed?` · ${r.fixed} mục tồn đã khắc phục`:"")+(r.closed-r.fixed>0?` · đóng ${r.closed-r.fixed} lỗi cũ đã đạt`:"")+".");STATUS=null;refreshCount();
     try{CR.open=(await run("getConfig",ADMIN)).open;D.carry={};saveDraft();renderStaff()}catch(_){}}
