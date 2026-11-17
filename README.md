@@ -1,6 +1,6 @@
 # KSCL Showroom · VinFast SAMCO Bình Tân
 
-https://kscl.vinfastsamcobinhtan.com · bản **v3.4**
+https://kscl.vinfastsamcobinhtan.com · bản **v3.5**
 
 ## Kiến trúc
 Giao diện (GitHub Pages) → Apps Script (link `/exec` trong `config.js`) → Google Sheet + Drive.
@@ -19,6 +19,7 @@ App một file (`index.html`), không dùng samco-core. Ảnh chụp và báo c�
 |---|---|
 | `index.html` | Toàn bộ giao diện |
 | `config.js` | Link `/exec` của Apps Script |
+| `version.json` | Số phiên bản hiện tại (app so sánh để báo "Đã có bản mới") |
 | `icon.svg`, `icon-180.png`, `favicon.ico` | Biểu tượng |
 | `logo.png` | Logo SAMCO trên báo cáo |
 | `quanly.html`, `khac-phuc.html` | Trang chuyển hướng |
@@ -33,6 +34,7 @@ App một file (`index.html`), không dùng samco-core. Ảnh chụp và báo c�
 3. Đổi link Apps Script: chỉ sửa `config.js`.
 
 ## Phiên bản
+- v3.5 (17/11/2026): mã truy cập 4 số (tự đổi từ mã 6 số); mở lại vào thẳng trang của mình; ảnh gửi lỗi có nút Thử lại; bỏ 2 lệnh xóa dữ liệu khỏi menu; sao lưu hằng tuần, sheet _Log; chân trang phiên bản.
 - v3.4: ảnh chụp theo từng tiêu chí; tự xóa phiếu nháp cũ hơn 60 ngày; link Apps Script chuyển sang `config.js`.
 - v3.2: bộ tiêu chí VinFast SR_4_026, lộ trình 13 khối, 64 ảnh mẫu, điểm VinFast x/105 + PDF.
 - v2: giao lỗi, hạn xử lý, khắc phục, xác nhận.
