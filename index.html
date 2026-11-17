@@ -190,6 +190,9 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .ph{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;background:var(--paper-2);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);text-align:center}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .ph .st{position:absolute;left:0;right:0;bottom:0;font-size:.6rem;background:var(--scrim);color:var(--on-scrim);padding:2px 3px;text-align:center}
+.app-foot{text-align:center;color:var(--muted);font-size:.7rem;line-height:1.7;padding:24px 12px 96px}
+.upd-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:80;border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;padding:12px 20px;box-shadow:0 8px 24px rgba(0,0,0,.28);cursor:pointer;white-space:nowrap}
+.ph .st.retry{top:auto;right:0;left:0;bottom:0;height:auto;border-radius:0;line-height:1.2;border:none;width:100%;background:var(--bad);color:#fff;font-weight:700;cursor:pointer;padding:6px 2px;font-size:.7rem;white-space:nowrap}
 .ph button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:none;background:var(--scrim);color:var(--on-scrim);font-size:14px;line-height:1;cursor:pointer}
 .pick{position:relative;width:76px;height:76px;border:1.5px dashed var(--accent);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--accent);font-size:.7rem;font-weight:700;cursor:pointer;text-align:center;background:var(--accent-soft)}
 .pick span.plus{font-size:1.5rem;line-height:1;font-weight:400}
@@ -440,6 +443,8 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const API_URL = String(window.API_URL || ""); // link /exec nằm trong config.js
 /* ============================================================================ */
 // Gọi máy chủ Apps Script. Gửi dạng text/plain và không kèm cookie nên không dính tài khoản Google trên trình duyệt.
+/* Gửi ảnh: tự thử lại tối đa 2 lần (mạng chập chờn) */
+const runRetry=async(fn,...args)=>{let last;for(let k=0;k<3;k++){try{return await run(fn,...args)}catch(e){last=e;if(/Mã |quyền/.test(String(e&&e.message||e)))break;await new Promise(r=>setTimeout(r,1500*(k+1)))}}throw last};
 const run=(fn,...args)=>{
   if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL))return Promise.reject(new Error("Chưa cấu hình API_URL (link kết thúc bằng /exec)."));
   return fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn,args}),redirect:"follow",credentials:"omit"})
@@ -521,6 +526,7 @@ const GUEST_VIEWS=["tieu-chuan","login"]; // chỉ Tiêu chuẩn công khai
 const ROLE_HOME={inspector:"kiem-tra",leader:"bao-cao",manager:"bao-cao",dept:"khac-phuc"};
 const VIEW_NAME={"kiem-tra":"Kiểm tra","bao-cao":"Báo cáo","khac-phuc":"Khắc phục"};
 let ACC=ls.get("kscl:acc");if(!ACC||!ACC.code||!ROLE_VIEWS[ACC.role])ACC=null;
+if(ACC&&/^\d{6}$/.test(ACC.code)){ACC.code=ACC.code.slice(0,4);ls.set("kscl:acc",ACC)} // v3.5: mã cũ 6 số đã đổi thành 4 số đầu
 let ADMIN=ACC&&ACC.role==="inspector"?ACC.code:"";
 const isInspector=()=>ACC?.role==="inspector";
 const canReport=()=>!!ACC&&viewsOf(ACC).includes("bao-cao");
@@ -528,7 +534,7 @@ const canConfirm=i=>isInspector()||(ACC?.role==="manager"&&(ACC.depts||[]).inclu
 function applyAcc(){
   // chưa đăng nhập: hiện đủ 3 tab, bấm Kiểm tra / Khắc phục sẽ được hỏi mã
   document.querySelectorAll(".nav button[data-view]").forEach(b=>b.hidden=!!ACC&&!viewsOf(ACC).includes(b.dataset.view));
-  $("logout").hidden=false;$("logout").textContent="Đăng nhập";
+  $("logout").hidden=false;$("logout").textContent=ACC?(ACC.person||ACC.name):"Đăng nhập";$("logout").title=ACC?"Tài khoản · đổi người / đăng xuất":"";
   const cur=$("login-current");cur.hidden=!ACC;
   cur.innerHTML=ACC?`<div>Đang dùng: <b>${esc(ACC.name)}</b>${ACC.person?" · "+esc(ACC.person):""}</div><div class="actions" style="margin-top:8px"><button class="btn sm" data-goto="${ROLE_HOME[ACC.role]}">Tiếp tục</button><button class="btn quiet sm" id="logout-real">Đăng xuất</button></div>`:"";
   const lo=$("logout-real");if(lo)lo.onclick=()=>logout();
@@ -537,7 +543,7 @@ function applyAcc(){
   DEPT=ACC&&(ACC.role==="dept"||ACC.role==="manager")?{bp:ACC.bp,pin:ACC.code,name:ACC.person||"",manager:ACC.role==="manager"}:null;
   if(!canReport()){STATUS=null;$("nav-count").hidden=true}
 }
-function logout(msg){ACC=null;ls.del("kscl:acc");CR=null;KP=null;STATUS=null;applyAcc();if(msg)toast(msg);BOOT.view="";show("login")}
+function logout(msg){ACC=null;ls.del("kscl:acc");ls.del("kscl:cr");ls.del("kscl:st");CR=null;KP=null;STATUS=null;applyAcc();if(msg)toast(msg);BOOT.view="";show("login")}
 $("logout").onclick=()=>{BOOT.view="";show("login")};
 $("login-name").value=ls.get("kscl:person")||"";
 $("login-go").onclick=async()=>{const code=$("login-code").value.trim(),person=$("login-name").value.trim();
@@ -547,9 +553,10 @@ $("login-go").onclick=async()=>{const code=$("login-code").value.trim(),person=$
     $("login-code").value="";if(pinMode)renderPin();STATUS=null;KP=null;CR=null;applyAcc();show(viewsOf(ACC).includes(BOOT.view)?BOOT.view:ROLE_HOME[ACC.role]);if(view!=="bao-cao")refreshCount()}
   catch(e){toast(errText(e));if(pinMode){$("login-code").value="";renderPin();const d=$("pin-dots");d.classList.remove("shake");void d.offsetWidth;d.classList.add("shake")}}b.disabled=false};
 ["login-code","login-name"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")$("login-go").click()}));
+$("login-code").addEventListener("input",()=>{if(!pinMode&&/^\d{4}$/.test($("login-code").value.trim())&&!$("login-go").disabled)$("login-go").click()});
 
 /* ---- bàn phím số: điện thoại (màn hình cảm ứng, hẹp) dùng bàn phím 10 số như mở khóa; máy tính dùng ô nhập ---- */
-const PIN_LEN=6; // mã do hệ thống tạo luôn 6 số: đủ 6 số là tự đăng nhập
+const PIN_LEN=4; // từ v3.5 mã 4 số: đủ 4 số là tự đăng nhập
 let pinMode=matchMedia("(pointer:coarse) and (max-width:760px)").matches;
 function renderPin(){const n=$("login-code").value.length,total=Math.max(PIN_LEN,n);
   $("pin-dots").innerHTML=Array.from({length:total},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("");$("pin-dots").setAttribute("aria-label","Đã nhập "+n+" số")}
@@ -596,8 +603,10 @@ $("sum").addEventListener("input",e=>{D.sum=e.target.value;saveDraft()});
 loadDraft();
 
 function loadConfig(){
+  const old=ls.get("kscl:cr");
+  if(!CR&&old&&old.code===ACC.code&&old.c){CR=old.c;$("hd-eyebrow").textContent=`KSCL Showroom · ${CR.showroom} · ${CR.model}`;renderStaff()}
   return run("getConfig",ACC.code).then(c=>{
-    CR=c;$("hd-eyebrow").textContent=`KSCL Showroom · ${c.showroom} · ${c.model}`;
+    CR=c;ls.set("kscl:cr",{code:ACC.code,c});$("hd-eyebrow").textContent=`KSCL Showroom · ${c.showroom} · ${c.model}`;
     if(c.warnings?.length){$("warn").textContent="Tiêu chí trong Google Sheet cần xem lại: "+c.warnings.slice(0,3).join("; ");$("warn").hidden=false}
     renderStaff();
   }).catch(e=>{if(authErr(errText(e)))return adminErr(e);$("groups").innerHTML=`<div class="empty">Chưa tải được tiêu chí. ${esc(errText(e))}</div>`;$("progress").textContent=""});
@@ -674,7 +683,7 @@ const crPhotos=(ik,cid)=>photosOf(crPk(ik,cid)).filter(p=>p.status==="ok").map(p
 /* ảnh của hạng mục = gộp ảnh các tiêu chí của hạng mục (lưu vào Chi tiết) */
 function photoMap(){const out={};for(const i of instances()){const u=[];i.crit.forEach(c=>crPhotos(i.key,c.id).forEach(x=>{if(!u.includes(x))u.push(x)}));out[i.key]=u}return out}
 let PM_=null;const insPhotos=ik=>(PM_||photoMap())[ik]||[];
-const photoStrip=(pk,ph,label)=>`<div class="photos" data-pk="${esc(pk)}">${ph.map((p,i)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh ${i+1}">`:(p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:"")}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi, xóa và chụp lại"}</span>`:""}<button data-del="${i}" aria-label="Xóa ảnh">×</button></div>`).join("")}
+const photoStrip=(pk,ph,label)=>`<div class="photos" data-pk="${esc(pk)}">${ph.map((p,i)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh ${i+1}">`:(p.id?`<img src="${thumb(p.id,200)}" alt="Ảnh ${i+1}">`:"")}${p.status==="up"?`<span class="st">Đang tải…</span>`:p.status==="err"?`<button class="st retry" data-retry="${i}">↻ Thử lại</button>`:""}<button data-del="${i}" aria-label="Xóa ảnh">×</button></div>`).join("")}
       <label class="pick"><span class="plus">+</span>${esc(label||"Thêm ảnh")}<input type="file" accept="image/*" multiple></label></div>`;
 function score(list){let y=0,n=0,u=0;for(const i of list){const r=D.res[i.key]||{};for(const c of i.crit){const m=r[c.id]?.met;if(m===true)y++;else if(m===false)n++;else u++}}return{y,n,u,p:(y+n)?y/(y+n):null}}
 /* mục tồn: lỗi còn mở của tiêu chí kỳ lớn hơn, phát hiện trước ngày kiểm này */
@@ -777,6 +786,7 @@ $("v-kiem-tra").addEventListener("click",e=>{
   const card=b.closest(".card");if(!card)return;const key=card.dataset.key,wc=walkCards().find(c=>c.key===key);if(!wc)return;
   if(b.dataset.sample!==undefined){lbOpen(cardSamples(wc),+b.dataset.sample);return}
   if(b.dataset.crs){const it=wc.items.find(x=>x.c.id===b.dataset.crs);if(it)lbOpen(it.c.samples||[],0);return}
+  if(b.dataset.retry!==undefined){const pk=b.closest(".photos")?.dataset.pk||key;const p=photosOf(pk)[+b.dataset.retry];if(p&&p.full)sendPhoto(p,key);else toast("Ảnh này cần chụp lại.");return}
   if(b.dataset.del!==undefined){const pk=b.closest(".photos")?.dataset.pk||key;const p=photosOf(pk).splice(+b.dataset.del,1)[0];if(p?.id)run("deletePhoto",ADMIN,p.id).catch(()=>{});saveDraft();rerenderCard(key);return}
   if(b.hasAttribute("data-allok")){wc.items.forEach(({ins,c})=>{const r=resOf(ins.key);if(!r[c.id]||r[c.id].met==null)r[c.id]={met:true}});saveDraft();rerenderCard(key);return}
   if(b.dataset.v){const row=b.closest(".cr"),cid=row.dataset.cid,ik=row.dataset.ik,r=resOf(ik),v=b.dataset.v==="y";
@@ -793,15 +803,18 @@ $("v-kiem-tra").addEventListener("change",async e=>{
   const label=(wc.sub?wc.sub+" - ":"")+wc.title+" - "+cid;
   const files=[...t.files];t.value="";
   for(const f of files){
-    const p={status:"up"};photosOf(pk).push(p);
-    try{p.thumb=await resize(f,240,0.7);rerenderCard(key);
-      const full=await resize(f,1600,0.82);
-      const r=await run("uploadPhoto",ADMIN,reportId(),label,full);
-      Object.assign(p,r,{status:"ok"});saveDraft();
-    }catch(err){p.status="err";adminErr(err)}
-    rerenderCard(key);
+    const p={status:"up",label};photosOf(pk).push(p);
+    try{p.thumb=await resize(f,240,0.7);rerenderCard(key);p.full=await resize(f,1600,0.82)}catch(err){p.status="err";toast(errText(err));rerenderCard(key);continue}
+    await sendPhoto(p,key);
   }
 });
+/* gửi 1 ảnh (giữ bản đầy đủ trên máy cho tới khi gửi được, để bấm Thử lại không phải chụp lại) */
+async function sendPhoto(p,key){
+  p.status="up";rerenderCard(key);
+  try{const r=await runRetry("uploadPhoto",ADMIN,reportId(),p.label,p.full);Object.assign(p,r,{status:"ok"});delete p.full;saveDraft()}
+  catch(err){p.status="err";if(authErr(errText(err)))adminErr(err);else toast("Chưa gửi được ảnh. Bấm \"Thử lại\" trên ảnh khi mạng ổn định.")}
+  rerenderCard(key);
+}
 function reportData(){
   const ins=instances(),all=score(ins);const groups={};PM_=photoMap();
   for(const g of Object.keys(CR.groups)){const a=score(ins.filter(i=>i.cp.group===g));groups[g]={p:a.p}}
@@ -827,8 +840,9 @@ $("save-rep").onclick=async()=>{
 let STATUS=null,timer=null;
 async function loadStatus(quiet){
   if(!canReport())return;
+  if(!STATUS){const old=ls.get("kscl:st");if(old&&old.code===ACC.code&&old.s){STATUS=old.s;try{renderStatus();setCount()}catch(_){STATUS=null}}}
   if(!quiet&&!STATUS)$("bc-list").innerHTML=`<div class="empty">Đang tải…</div>`;
-  try{STATUS=await run("getStatus",ACC.code);renderStatus();setCount()}catch(e){const m=errText(e);if(authErr(m))return adminErr(e);
+  try{STATUS=await run("getStatus",ACC.code);ls.set("kscl:st",{code:ACC.code,s:STATUS});renderStatus();setCount()}catch(e){const m=errText(e);if(authErr(m))return adminErr(e);
     if(/chưa được cấp quyền xem Báo cáo/.test(m)){ACC.report=false;ls.set("kscl:acc",ACC);applyAcc();toast(m);return show(ROLE_HOME[ACC.role])}if(!quiet)$("bc-list").innerHTML=`<div class="empty">Chưa tải được. ${esc(m)}</div>`}
   clearTimeout(timer);timer=setTimeout(()=>{if(view==="bao-cao"&&!document.hidden)loadStatus(true);else timer=setTimeout(()=>loadStatus(true),60000)},60000);
 }
@@ -921,7 +935,7 @@ function renderDept(){
       <div class="fxmode" role="group" aria-label="Tình trạng"><button data-mode="done" aria-pressed="${dr.mode!=="doing"}">${tk?"Đã kiểm tra xong":"Đã khắc phục"}</button><button data-mode="doing" aria-pressed="${dr.mode==="doing"}">${tk?"Cần thêm thời gian":"Đang khắc phục · cần thời gian"}</button></div>
       ${dr.mode==="doing"?`<label class="f"><span>Dự kiến hoàn thành <span class="req">*</span></span><input type="date" class="fxeta" value="${esc(dr.eta)}" min="${today}"></label>`:""}
       <label class="f"><span>${dr.mode==="doing"?"Việc đang làm":tk?"Kết quả kiểm tra":"Nội dung khắc phục"} <span class="req">*</span></span><textarea class="fx" rows="2" placeholder="${dr.mode==="doing"?"Việc đang làm và lý do cần thêm thời gian":tk?"Kết quả tự kiểm tra":"Mô tả ngắn việc đã khắc phục"}">${esc(dr.text)}</textarea></label>
-      <div class="photos">${dr.photos.map((p,k)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh khắc phục ${k+1}">`:""}${p.status!=="ok"?`<span class="st">${p.status==="up"?"Đang tải…":"Lỗi"}</span>`:""}<button data-fdel="${k}" aria-label="Xóa ảnh">×</button></div>`).join("")}
+      <div class="photos">${dr.photos.map((p,k)=>`<div class="ph">${p.thumb?`<img src="${p.thumb}" alt="Ảnh khắc phục ${k+1}">`:""}${p.status==="up"?`<span class="st">Đang tải…</span>`:p.status==="err"?`<button class="st retry" data-fretry="${k}">↻ Thử lại</button>`:""}<button data-fdel="${k}" aria-label="Xóa ảnh">×</button></div>`).join("")}
         <label class="pick"><span class="plus">+</span>Thêm ảnh<input type="file" accept="image/*" multiple class="fxfile"></label></div>
       <div class="actions"><button class="btn" data-send>${dr.mode==="doing"?(i.status===DOING?"Cập nhật tiến độ":"Báo đang khắc phục"):i.status===WAIT?(tk?"Cập nhật kết quả":"Cập nhật khắc phục"):(tk?"Gửi kết quả kiểm tra":"Báo đã khắc phục")}</button>${i.status===WAIT?`<span class="small muted">Đã gửi ${esc(i.fixAt)} · chờ xác nhận</span>`:""}</div>
     </div>`}).join("")
@@ -933,13 +947,19 @@ $("kp-list").addEventListener("change",async e=>{
   const card=t.closest(".iss"),row=card.dataset.row,i=KP.issues.find(x=>String(x.row)===row),dr=FIXDRAFT[row];
   const files=[...t.files];t.value="";
   for(const f of files){const p={status:"up"};dr.photos.push(p);
-    try{p.thumb=await resize(f,240,0.7);renderDept();const full=await resize(f,1600,0.82);
-      Object.assign(p,await run("uploadFixPhoto",DEPT.bp,DEPT.pin,i.report,i.area,full),{status:"ok"})}catch(err){p.status="err";toast(errText(err))}
-    renderDept()}
+    try{p.thumb=await resize(f,240,0.7);renderDept();p.full=await resize(f,1600,0.82);p.rep=i.report;p.area=i.area}catch(err){p.status="err";toast(errText(err));renderDept();continue}
+    await sendFixPhoto(p)}
 });
+async function sendFixPhoto(p){
+  p.status="up";renderDept();
+  try{Object.assign(p,await runRetry("uploadFixPhoto",DEPT.bp,DEPT.pin,p.rep,p.area,p.full),{status:"ok"});delete p.full}
+  catch(err){p.status="err";toast("Chưa gửi được ảnh. Bấm \"Thử lại\" trên ảnh khi mạng ổn định.")}
+  renderDept();
+}
 $("kp-list").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;const card=b.closest(".iss");if(!card)return;const row=card.dataset.row,dr=FIXDRAFT[row];
   if(b.dataset.trio!==undefined){const i=KP.issues.find(x=>String(x.row)===row);lbOpen(trioList(i),+b.dataset.trio);return}
+  if(b.dataset.fretry!==undefined){const p=dr.photos[+b.dataset.fretry];if(p&&p.full)sendFixPhoto(p);else toast("Ảnh này cần chụp lại.");return}
   if(b.dataset.fdel!==undefined){dr.photos.splice(+b.dataset.fdel,1);renderDept();return}
   if(b.dataset.mode){dr.mode=b.dataset.mode;renderDept();return}
   if(b.hasAttribute("data-send")){
@@ -999,6 +1019,17 @@ $("tc-q").addEventListener("input",()=>{clearTimeout(window.__tcT);window.__tcT=
 $("tc-groups").addEventListener("click",e=>{const b=e.target.closest("button[data-g]");if(!b)return;tcGroup=b.dataset.g;renderStandards()});
 $("tc-list").addEventListener("click",e=>{const b=e.target.closest("button[data-tsample]");if(!b)return;const cp=STD.checkpoints.find(x=>x.id===b.closest(".card").dataset.cp);lbOpen(cp.samples,+b.dataset.tsample)});
 
+/* ---------- chân trang: phiên bản + báo bản mới ---------- */
+const APP_V="3.5.0";
+(function(){const f=document.createElement("footer");f.className="app-foot";
+  f.innerHTML="KSCL Showroom · phiên bản "+APP_V+"<br>© "+new Date().getFullYear()+" VinFast SAMCO Bình Tân · Lưu hành nội bộ";
+  (document.querySelector(".wrap")||document.body).appendChild(f);
+  const check=()=>fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{
+    if(!j||!j.v||j.v===APP_V||document.querySelector(".upd-bar"))return;
+    const b=document.createElement("button");b.type="button";b.className="upd-bar";b.textContent="Đã có bản mới · bấm để tải lại";b.onclick=()=>location.reload();document.body.appendChild(b)}).catch(()=>{});
+  check();document.addEventListener("visibilitychange",()=>{if(!document.hidden)check()});
+})();
+
 /* ---------- boot ---------- */
 let booted=false;
 function boot(){
@@ -1008,6 +1039,7 @@ function boot(){
   // mặc định mở màn hình Đăng nhập; link có ?trang=... thì mở thẳng trang đó (nếu được phép)
   if(BOOT.view&&ACC&&viewsOf(ACC).includes(BOOT.view))show(BOOT.view);
   else if(BOOT.view&&!ACC&&VIEW_NAME[BOOT.view])show(BOOT.view); // chưa đăng nhập: show() chuyển sang Đăng nhập, nhớ trang cần mở
+  else if(ACC&&!BOOT.view)show(ROLE_HOME[ACC.role]); // đã đăng nhập trên máy này: vào thẳng, không hiện màn Đăng nhập
   else show(GUEST_VIEWS.includes(BOOT.view)?BOOT.view:"login");
   if(view!=="bao-cao")refreshCount();
 }
